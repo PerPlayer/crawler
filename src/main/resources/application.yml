@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    name: test
+    password: tiger
+    username: root
+    driver-class-name: com.mysql.jdbc.Driver
