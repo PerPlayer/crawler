@@ -1,6 +1,14 @@
 spring:
   datasource:
-    name: test
     password: tiger
-    username: root
+    username: scott
     driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/test
+  data:
+    jpa:
+      repositories:
+        enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
