@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--
+    ** 引入配置参数，如果在此配置了和application.properties相同的选项，结果会被覆盖
+    <properties resource="application.properties">
+        <property name="username" value="db_user" />
+        <property name="password" value="verysecurepwd" />
+    </properties>
+
+    ** Mybatis参数设置
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="enhancementEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="maxRequests" value="32"/>
+        <setting name="maxSessions" value="10"/>
+        <setting name="maxTransactions" value="5"/>
+        <setting name="useStatementNamespaces" value="true"/>
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
+    </settings>
+
+
+    -->
+
+
+    <!-- 类型别名，sqlMapper下引用此类时可以省略路径 -->
+    <typeAliases>
+        <!-- 为具体类配置别名，也可以通过在具体bean上加@Alias配置，但是必须要在这里指定bean所属包路径-->
+        <!--<typeAlias type="com.test.mybatis.entity.PageEntity" alias="PageEntity"/>-->
+        <!-- 会自动为当前包下的所有bean配置一个(大)小写字母开关的别名 -->
+        <package name="com.crawler.crawler.model"/>
+    </typeAliases>
+
+    <!-- 类型处理器 如果bean下字段类型是基本类型，mybatis可以自动匹配，如果是自定义的类型，则需要定义类型处理器 -->
+<!--
+
+    数据源配置，切换数据只要修改defalut值
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driverClassName}" />
+                <property name="url" value="${jdbc.url}" />
+                <property name="username" value="${jdbc.username}" />
+                <property name="password" value="${jdbc.password}" />
+            </dataSource>
+        </environment>
+        <environment id="production">
+            <transactionManager type="MANAGED" />
+            <dataSource type="JNDI">
+                <property name="data_source" value="java:comp/jdbc/MyBatisDemoDS" />
+            </dataSource>
+        </environment>
+    </environments>
+-->
+
+    <!--
+        指定数据库分页方言Dialect,
+        其它方言:OracleDialect,SQLServerDialect,SybaseDialect,DB2Dialect,PostgreSQLDialect,MySQLDialect,DerbyDialect
+
+    <plugins>
+        <plugin interceptor="com.asgard.cfap.plugin.dialect.interceptor.OffsetLimitInterceptor">
+            <property name="dialectClass" value="com.asgard.cfap.plugin.dialect.MySQLDialect"/>
+        </plugin>
+    </plugins>
+     -->
+    <!--
+    &lt;!&ndash;实体映射文件&ndash;&gt;
+    <mappers>
+        &lt;!&ndash;<mapper resource="conf.mapper.mapper-page.xml"/>&ndash;&gt;
+        &lt;!&ndash;<mapper url="file:///E:/workspace......"/>&ndash;&gt;
+        <mapper class="com.test.mybatis.entity.PageEntity"/>
+        <package name="com.test.mybatis.entity"/>
+    </mappers>
+    -->
+</configuration>

@@ -12,3 +12,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+#mybatis:
+#  config-location: conf/mybatis-config.xml
+#  mapper-locations: classpath:conf/mapper/*.xml
+#  type-aliases-package: com.crawler.crawler.model

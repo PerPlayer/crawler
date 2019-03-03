@@ -3,33 +3,37 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.crawler.dao.ElementDao">
+<mapper namespace="com.crawler.dao.TaskDao">
     <!-- 公用字段 -->
-    <resultMap id="baseMap" type="Element">
+    <resultMap id="baseMap" type="Task">
         <id property="id" column="id"/>
         <result property="createTime"   column="create_time"/>
         <result property="modifyTime"   column="modify_time"/>
         <result property="status"   column="status"/>
     </resultMap>
 
-    <resultMap id="elementResultMap" type="Element" extends="baseMap">
-        <result property="title"   column="title"/>
-        <result property="content"   column="content"/>
-        <result property="taskId"   column="task_id"/>
+    <resultMap id="elementResultMap" type="Task" extends="baseMap">
+        <result property="href"   column="href"/>
+        <result property="source"   column="source"/>
+        <result property="domain"   column="domain"/>
         <result property="weight"   column="weight"/>
+        <result property="deep"   column="deep"/>
     </resultMap>
 
     <sql id="selectBlock">
         c.id AS id,
-        c.title AS title,
-        c.content AS content,
+        c.href AS href,
+        c.source AS source,
+        c.domain AS domain,
         c.create_time AS createTime,
         c.modify_time AS modifyTime,
+        c.weight AS weight,
+        c.deep AS deep,
         c.status AS status
     </sql>
 
     <update id="update">
-        update element set ${column} = #{value} where id = #{id}
+        update task set ${column} = #{value} where id = #{id}
     </update>
 
     <!--

@@ -3,8 +3,14 @@ package com.crawler.crawler.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity
@@ -12,12 +18,27 @@ import java.util.Date;
 @NoArgsConstructor
 public class Element {
     @Id
-    private long id;
+    @Column(name = "id", length = 32)
+    private String id;
+    @NotNull
+    @Size(min = 5, max = 50, message = "{length.too.long}"/*, groups = ElementGroup.class*/)
+    @Column(name = "title", length = 50)
     private String title;
+//    @Pattern(regexp = "[0-9]*", message = "类型错误")
+    @NotNull
+    @Column(name = "content", length = 4000)
     private String content;
-    private long taskId;
-    private Date creatTime;
+    @NotNull
+    @Column(name = "taskId", length = 32)
+    private String taskId;
+    private Date createTime;
     private Date modifyTime;
+    @Digits(integer = 2, fraction = 2, message = "超出范围")
+    @Column(name = "weight", length = 1)
     private int weight;
+    //    @Transient
+    @Column(name = "status", length = 1)
     private int status;
+
+    public interface ElementGroup{}
 }

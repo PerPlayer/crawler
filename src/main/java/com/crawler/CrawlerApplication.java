@@ -2,27 +2,21 @@ package com.crawler;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.server.ConfigurableWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-//@EnableAutoConfiguration
+@ComponentScan("com.crawler")
 //@Profile("dev")
-public class CrawlerApplication extends SpringBootServletInitializer implements EmbeddedServletContainerCustomizer {
+public class CrawlerApplication implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
     public static void main(String[] args) {
         SpringApplication.run(CrawlerApplication.class, args);
     }
 
     @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(CrawlerApplication.class);
-    }
-
-    @Override
-    public void customize(ConfigurableEmbeddedServletContainer container) {
-        container.setPort(80);
+    public void customize(ConfigurableWebServerFactory factory) {
+        factory.setPort(80);
     }
 }
