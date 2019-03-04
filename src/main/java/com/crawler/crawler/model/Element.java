@@ -3,10 +3,7 @@ package com.crawler.crawler.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -39,6 +36,8 @@ public class Element {
     //    @Transient
     @Column(name = "status", length = 1)
     private int status;
+    @Version
+    private int version;
 
     public interface ElementGroup{}
 }

@@ -27,4 +27,6 @@ public class Task {
     private int deep;
     @Column(name = "status", length = 1)
     private int status;
+    @Version
+    private int version;
 }

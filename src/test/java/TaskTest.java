@@ -1,7 +1,9 @@
 import com.crawler.CrawlerApplication;
 import com.crawler.config.WebConfig;
 import com.crawler.crawler.model.Element;
+import com.crawler.crawler.model.Task;
 import com.crawler.service.ElementService;
+import com.crawler.service.TaskService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +22,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class TaskTest {
 
     @Autowired
-    private ElementService elementService;
+    private TaskService taskService;
 
     @Test
     public void saveTest(){
-        Element element = new Element();
-        element.setId("1001");
-        element.setTitle("Test");
-        element.setContent("A test content");
-        element.setWeight(20);
-        elementService.save(element);
+        Task task = new Task();
+        task.setId("1001");
+        task.setHref("www.bing.com");
+        task.setSource("human");
+        task.setDomain("www.bing.com");
+        task.setWeight(20);
+        task.setDeep(0);
+        task.setStatus(6);
+        taskService.save(task);
     }
 
     @Test
     public void updateTest(){
-        elementService.update("1001", "title", "Test");
+        taskService.update("1001", "title", "Test");
     }
 }

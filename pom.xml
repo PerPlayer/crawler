@@ -23,9 +23,15 @@
 		<!--<tomcat.version>8</tomcat.version>-->
 		<boot.version>2.1.0.RELEASE</boot.version>
 		<selenium.version>3.14.0</selenium.version>
+		<joda-time.version>2.9.9</joda-time.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${joda-time.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>

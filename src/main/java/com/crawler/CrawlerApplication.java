@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
-@ComponentScan("com.crawler")
 //@Profile("dev")
 public class CrawlerApplication implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 

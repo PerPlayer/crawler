@@ -13,6 +13,8 @@ public interface ElementService {
 
     void update(String id, String column, Object value);
 
+    void update(Element element);
+
     void delete(Element element);
 
     List<Element> findAll();

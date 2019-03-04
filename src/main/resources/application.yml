@@ -1,9 +1,9 @@
 spring:
   datasource:
+    username: root
     password: tiger
-    username: scott
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test
+    url: jdbc:mysql://localhost:3307/test
   data:
     jpa:
       repositories:
@@ -12,7 +12,18 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+#    database-platform: org.hibernate.dialect.MySQLDialect
+#    database: MYSQL
+
+#  profiles:
+#    active: dev
 #mybatis:
 #  config-location: conf/mybatis-config.xml
 #  mapper-locations: classpath:conf/mapper/*.xml
 #  type-aliases-package: com.crawler.crawler.model
+server:
+  port: 80
+  servlet:
+    context-path: /perplayer
+  tomcat:
+    uri-encoding: UTF-8
