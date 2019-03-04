@@ -3,7 +3,7 @@ spring:
     username: root
     password: tiger
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/test
+    url: jdbc:mysql://47.101.189.129:3307/test
   data:
     jpa:
       repositories:

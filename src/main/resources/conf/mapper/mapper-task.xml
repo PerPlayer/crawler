@@ -5,14 +5,14 @@
 
 <mapper namespace="com.crawler.dao.TaskDao">
     <!-- 公用字段 -->
-    <resultMap id="baseMap" type="Task">
+    <resultMap id="baseMap" type="com.crawler.crawler.model.Task">
         <id property="id" column="id"/>
         <result property="createTime"   column="create_time"/>
         <result property="modifyTime"   column="modify_time"/>
         <result property="status"   column="status"/>
     </resultMap>
 
-    <resultMap id="elementResultMap" type="Task" extends="baseMap">
+    <resultMap id="elementResultMap" type="com.crawler.crawler.model.Task" extends="baseMap">
         <result property="href"   column="href"/>
         <result property="source"   column="source"/>
         <result property="domain"   column="domain"/>

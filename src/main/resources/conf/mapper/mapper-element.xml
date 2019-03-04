@@ -5,14 +5,14 @@
 
 <mapper namespace="com.crawler.dao.ElementDao">
     <!-- 公用字段 -->
-    <resultMap id="baseMap" type="Element">
+    <resultMap id="baseMap" type="com.crawler.crawler.model.Element">
         <id property="id" column="id"/>
         <result property="createTime"   column="create_time"/>
         <result property="modifyTime"   column="modify_time"/>
         <result property="status"   column="status"/>
     </resultMap>
 
-    <resultMap id="elementResultMap" type="Element" extends="baseMap">
+    <resultMap id="elementResultMap" type="com.crawler.crawler.model.Element" extends="baseMap">
         <result property="title"   column="title"/>
         <result property="content"   column="content"/>
         <result property="taskId"   column="task_id"/>
