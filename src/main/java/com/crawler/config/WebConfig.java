@@ -2,6 +2,8 @@ package com.crawler.config;
 
 import com.crawler.extend.HandlerExceptionResolverExtend;
 import com.crawler.extend.InjectCurrentUserHandler;
+import com.crawler.listener.StartTaskApplicationListener;
+import com.crawler.util.ApplicationContextUtil;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,5 +48,15 @@ public class WebConfig implements WebMvcConfigurer {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasename("classpath:ValidationMessages.properties");//如果不加默认使用classpath下的 ValidationMessages.properties
         return messageSource;
+    }
+
+    @Bean
+    public StartTaskApplicationListener StartTaskApplicationListener(){
+        return new StartTaskApplicationListener();
+    }
+
+    @Bean
+    public ApplicationContextUtil ApplicationContextUtil(){
+        return new ApplicationContextUtil();
     }
 }

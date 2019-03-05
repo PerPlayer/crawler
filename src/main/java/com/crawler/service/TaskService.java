@@ -21,4 +21,6 @@ public interface TaskService {
     Page<Task> findAll(Pageable page);
 
     Task findById(String id);
+
+    List<Task> findByStatusAndDeepLessThan(int status, int deep);
 }

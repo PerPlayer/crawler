@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ElementDao {
+public interface EntryDao {
 
     void update(@Param("id") String id, @Param("column") String column, @Param("value") Object value);
 }

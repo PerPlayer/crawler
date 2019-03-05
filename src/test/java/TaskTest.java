@@ -1,16 +1,10 @@
 import com.crawler.CrawlerApplication;
-import com.crawler.config.WebConfig;
-import com.crawler.crawler.model.Element;
 import com.crawler.crawler.model.Task;
-import com.crawler.service.ElementService;
 import com.crawler.service.TaskService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -29,7 +23,7 @@ public class TaskTest {
         Task task = new Task();
         task.setId("1001");
         task.setHref("www.bing.com");
-        task.setSource("human");
+        task.setSiteId("1001");
         task.setDomain("www.bing.com");
         task.setWeight(20);
         task.setDeep(0);

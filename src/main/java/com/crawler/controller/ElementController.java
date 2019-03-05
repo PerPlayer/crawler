@@ -1,6 +1,6 @@
 package com.crawler.controller;
 
-import com.crawler.service.ElementService;
+import com.crawler.service.EntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 public class ElementController {
 
     @Autowired
-    private ElementService service;
+    private EntryService service;
 
     public String list(){
         service.save(null);

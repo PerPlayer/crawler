@@ -1,6 +1,6 @@
 import com.crawler.CrawlerApplication;
-import com.crawler.crawler.model.Element;
-import com.crawler.service.ElementService;
+import com.crawler.crawler.model.Entry;
+import com.crawler.service.EntryService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +16,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class ElementTest {
 
     @Autowired
-    private ElementService elementService;
+    private EntryService elementService;
 
     @Test
     public void saveTest(){
-        Element element = new Element();
-        element.setId("1001");
-        element.setTitle("ATest");
-        element.setContent("A test content");
-        element.setWeight(10);
-        element.setTaskId("1002");
-        element.setVersion(1);
-        elementService.save(element);
+        Entry entry = new Entry();
+        entry.setId("1001");
+        entry.setTitle("ATest");
+        entry.setContent("A test content");
+        entry.setWeight(10);
+        entry.setTaskId("1002");
+        entry.setVersion(1);
+        elementService.save(entry);
     }
 
     @Test

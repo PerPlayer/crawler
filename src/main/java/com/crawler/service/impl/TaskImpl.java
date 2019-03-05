@@ -1,14 +1,11 @@
 package com.crawler.service.impl;
 
 import com.crawler.annonation.GroupValid;
-import com.crawler.crawler.model.Element;
 import com.crawler.crawler.model.Task;
-import com.crawler.dao.ElementDao;
 import com.crawler.dao.TaskDao;
-import com.crawler.repository.ElementRepository;
 import com.crawler.repository.TaskRepository;
-import com.crawler.service.ElementService;
 import com.crawler.service.TaskService;
+import com.crawler.util.EntityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +25,8 @@ public class TaskImpl implements TaskService {
 
     @Override
     public Task save(@GroupValid Task task) {
+        EntityUtil.init(task);
+        task.setWeight(10);
         return repository.save(task);
     }
 
@@ -62,5 +61,10 @@ public class TaskImpl implements TaskService {
     public Task findById(String id) {
         Optional<Task> taskOptional = repository.findById(id);
         return taskOptional.get();
+    }
+
+    @Override
+    public List<Task> findByStatusAndDeepLessThan(int status, int deep) {
+        return repository.findByStatusAndDeepLessThan(status, deep);
     }
 }
