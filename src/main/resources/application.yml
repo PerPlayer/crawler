@@ -1,9 +1,9 @@
 spring:
   datasource:
-    username: scott
+    username: root
     password: tiger
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test
+    url: jdbc:mysql://db-server:3307/test
   data:
     jpa:
       repositories:
@@ -11,10 +11,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 #    database-platform: org.hibernate.dialect.MySQLDialect
 #    database: MYSQL
-
+  freemarker:
+    suffix: html
+    request-context-attribute: request
 #  profiles:
 #    active: dev
 #mybatis:

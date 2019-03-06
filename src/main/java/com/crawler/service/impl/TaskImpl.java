@@ -67,4 +67,9 @@ public class TaskImpl implements TaskService {
     public List<Task> findByStatusAndDeepLessThan(int status, int deep) {
         return repository.findByStatusAndDeepLessThan(status, deep);
     }
+
+    @Override
+    public long countByHref(String href) {
+        return repository.countByHref(href);
+    }
 }

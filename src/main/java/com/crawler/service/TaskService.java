@@ -23,4 +23,6 @@ public interface TaskService {
     Task findById(String id);
 
     List<Task> findByStatusAndDeepLessThan(int status, int deep);
+
+    long countByHref(String href);
 }

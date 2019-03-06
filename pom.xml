@@ -185,6 +185,7 @@
 				<!--</configuration>-->
 			</plugin>
 		</plugins>
+		<finalName>perplayer</finalName>
 	</build>
 
 	<repositories>

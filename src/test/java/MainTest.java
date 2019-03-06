@@ -7,11 +7,14 @@ import java.util.Random;
 public class MainTest {
 
     public static void main(String[] args) throws NoSuchMethodException {
-        Method[] methods = Entry.class.getMethods();
-        for (Method method : methods) {
-            System.out.println(method.getName());
-        }
-
-        System.out.println(Entry.class.getMethod("setId", String.class).getName());
+        Random random = new Random();
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
+        System.out.println(random.nextInt(10));
     }
 }

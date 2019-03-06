@@ -24,7 +24,7 @@ public class Entry extends BaseEntity {
     @Column(name = "title", length = 200)
     private String title;
     @NotNull
-    @Column(name = "content", length = 4000)
+    @Column(name = "content", columnDefinition = "mediumtext")
     private String content;
     @NotNull
     @Column(name = "taskId", length = 32)
