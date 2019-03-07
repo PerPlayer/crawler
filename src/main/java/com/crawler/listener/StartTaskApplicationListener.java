@@ -16,7 +16,7 @@ public class StartTaskApplicationListener implements ApplicationListener<Context
         try {
             logger.info("------- 任务启动 ------");
             Crawler.main(null);
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

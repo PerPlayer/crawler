@@ -14,9 +14,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.net.www.protocol.http.HttpURLConnection;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,7 +47,7 @@ public class Crawler {
                 logger.info("task: {}, title: {}", task.getId(), task.getDescription());
 //                Connection connection = getConnection(task.getHref());
                 URL url = new URL(task.getHref());
-                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 Document doc = null;
                 try {
                     doc = Jsoup.parse(connection.getInputStream(), "UTF-8", task.getHref());
