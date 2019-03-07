@@ -14,8 +14,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.net.www.protocol.http.HttpURLConnection;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,11 +32,11 @@ public class Crawler {
 
     Logger logger = LoggerFactory.getLogger(Crawler.class);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         new Crawler().execute();
     }
 
-    public void execute() throws InterruptedException {
+    public void execute() throws Exception {
         taskService = (TaskService) ApplicationContextUtil.getBean(TaskService.class);
         entryService = (EntryService) ApplicationContextUtil.getBean(EntryService.class);
         logger.info("-------- 开始解析 --------");
@@ -43,10 +45,13 @@ public class Crawler {
             List<Task> tasks = taskService.findByStatusAndDeepLessThan(0, 3);
             for (Task task : tasks) {
                 logger.info("task: {}, title: {}", task.getId(), task.getDescription());
-                Connection connection = getConnection(task.getHref());
+//                Connection connection = getConnection(task.getHref());
+                URL url = new URL(task.getHref());
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 Document doc = null;
                 try {
-                    doc = connection.get();
+                    doc = Jsoup.parse(connection.getInputStream(), "UTF-8", task.getHref());
+//                    doc = connection.get();
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                 }
@@ -97,6 +102,7 @@ public class Crawler {
 
     private Connection getConnection(String href) {
         return Jsoup.connect(href)
+                .header("content-type", "text/html; charset=UTF-8")
                  .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
                  .timeout(10000);
     }
