@@ -1,9 +1,15 @@
 spring:
   datasource:
-    username: root
-    password: tiger
+#    url: jdbc:mysql://47.101.189.129:3307/test?characterEncoding=UTF-8
+#    username: root
+#    password: tiger
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://db-server:3307/test
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      first:  #数据源1
+        url: jdbc:mysql://47.101.189.129:3307/test?characterEncoding=UTF-8
+        username: root
+        password: tiger
   data:
     jpa:
       repositories:

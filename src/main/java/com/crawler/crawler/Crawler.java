@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,13 +46,10 @@ public class Crawler {
             List<Task> tasks = taskService.findByStatusAndDeepLessThan(0, 3);
             for (Task task : tasks) {
                 logger.info("task: {}, title: {}", task.getId(), task.getDescription());
-//                Connection connection = getConnection(task.getHref());
-                URL url = new URL(task.getHref());
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                Connection connection = getConnection(task.getHref());
                 Document doc = null;
                 try {
-                    doc = Jsoup.parse(connection.getInputStream(), "UTF-8", task.getHref());
-//                    doc = connection.get();
+                    doc = connection.get();
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                 }
