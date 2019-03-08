@@ -1,8 +1,11 @@
 package com.crawler.crawler;
 
+import com.crawler.crawler.model.CodeEntry;
 import com.crawler.crawler.model.Entry;
 import com.crawler.crawler.model.Task;
 import com.crawler.crawler.rules.CsdnRule;
+import com.crawler.service.CacheService;
+import com.crawler.service.CodeEntryService;
 import com.crawler.service.EntryService;
 import com.crawler.service.TaskService;
 import com.crawler.util.ApplicationContextUtil;
@@ -31,6 +34,14 @@ public class Crawler {
 
     private EntryService entryService;
 
+    private CodeEntryService codeEntryService;
+
+    private Random random = new Random();
+
+    private int taskSleep = 5;
+
+    private int taskDeep = 3;
+
     Logger logger = LoggerFactory.getLogger(Crawler.class);
 
     public static void main(String[] args) throws Exception {
@@ -40,9 +51,15 @@ public class Crawler {
     public void execute() throws Exception {
         taskService = (TaskService) ApplicationContextUtil.getBean(TaskService.class);
         entryService = (EntryService) ApplicationContextUtil.getBean(EntryService.class);
+        codeEntryService = (CodeEntryService) ApplicationContextUtil.getBean(CodeEntryService.class);
+        taskSleep = getCodeIntValue("task.sleep", taskSleep);
+        taskDeep = getCodeIntValue("task.deep", taskDeep);
         logger.info("-------- 开始解析 --------");
-        Random random = new Random();
         while (true) {
+            if ("off".equals(getCodeStringValue("task.switch", "on"))) {
+                TimeUnit.SECONDS.sleep(taskSleep);
+                continue;
+            }
             List<Task> tasks = taskService.findByStatusAndDeepLessThan(0, 3);
             for (Task task : tasks) {
                 logger.info("task: {}, title: {}", task.getId(), task.getDescription());
@@ -55,7 +72,6 @@ public class Crawler {
                 }
                 parseEntry(task, doc);
                 parseChildHref(task, doc);
-                TimeUnit.SECONDS.sleep(random.nextInt(5));
                 updateTask(task);
             }
         }
@@ -84,6 +100,11 @@ public class Crawler {
                 childTask.setDescription(element.attr("title"));
                 childTask.setParentTask(task);
                 taskService.save(childTask);
+                try {
+                    TimeUnit.SECONDS.sleep(random.nextInt(taskSleep));
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage());
+                }
                 i++;
             }
         }
@@ -104,4 +125,21 @@ public class Crawler {
                  .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
                  .timeout(10000);
     }
+
+    private int getCodeIntValue(String code, int defaultValue) {
+        CodeEntry codeEntry = codeEntryService.findByCode(code);
+        if (codeEntry == null) {
+            return defaultValue;
+        }
+        return Integer.valueOf(codeEntry.getValue());
+    }
+
+    private String getCodeStringValue(String code, String defaultValue) {
+        CodeEntry codeEntry = codeEntryService.findByCode(code);
+        if (codeEntry == null) {
+            return defaultValue;
+        }
+        return codeEntry.getValue();
+    }
+
 }

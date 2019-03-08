@@ -3,33 +3,35 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.crawler.dao.EntryDao">
+<mapper namespace="com.crawler.dao.CodeEntryDao">
     <!-- 公用字段 -->
-    <resultMap id="baseMap" type="com.crawler.crawler.model.Entry">
+    <resultMap id="baseMap" type="com.crawler.crawler.model.CodeEntry">
         <id property="id" column="id"/>
         <result property="createTime"   column="create_time"/>
         <result property="modifyTime"   column="modify_time"/>
         <result property="status"   column="status"/>
     </resultMap>
 
-    <resultMap id="elementResultMap" type="com.crawler.crawler.model.Entry" extends="baseMap">
-        <result property="title"   column="title"/>
-        <result property="content"   column="content"/>
-        <result property="taskId"   column="task_id"/>
-        <result property="weight"   column="weight"/>
+    <resultMap id="elementResultMap" type="com.crawler.crawler.model.CodeEntry" extends="baseMap">
+        <result property="code"   column="code"/>
+        <result property="category"   column="category"/>
+        <result property="value"   column="value"/>
+        <result property="description"   column="description"/>
     </resultMap>
 
     <sql id="selectBlock">
         c.id AS id,
-        c.title AS title,
-        c.content AS content,
+        c.code AS code,
+        c.category AS category,
+        c.value AS value,
+        c.description AS description,
         c.create_time AS createTime,
         c.modify_time AS modifyTime,
         c.status AS status
     </sql>
 
     <update id="update">
-        update entry set ${column} = #{value} where id = #{id}
+        update code_entry set ${column} = #{value} where id = #{id}
     </update>
 
     <!--
