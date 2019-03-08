@@ -9,43 +9,76 @@
             div{
                 /*border: 1px solid black;*/
             }
-            #main{
+            #app{
                 margin: 0 auto;
-                width: 65%;
+                width: 90%;
             }
             .row{
                 border-bottom: 1px solid darkgray;
                 font-size: 18px;
                 height: 22px;
+                text-align: center;
             }
         </style>
-        <div id="main">
+        <div  id="app">
             <table cellpadding="4" cellspacing="0">
                 <tr>
                     <th width="0"></th>
-                    <th width="12%">标题</th>
-                    <th width="20%">内容</th>
                     <th width="12%">描述</th>
-                    <th width="10%">来源</th>
-                    <th width="10%">作者</th>
-                    <th width="25%">时间</th>
-                    <th width="11%">操作</th>
+                    <th width="20%">域名</th>
+                    <th width="12%">地址</th>
+                    <th width="10%">状态</th>
+                    <th width="18%">创建</th>
+                    <th width="18%">修改</th>
+                    <th width="10%">操作</th>
                 </tr>
                 <tr>
-                    <td><div class="row"><input type="text" value="${page.id}" hidden/></div></td>
-                    <td><div class="row">${page.title}</div></td>
-                    <td><div class="row">${page.content}</div></td>
-                    <td><div class="row">${page.description}</div></td>
-                    <td><div class="row">${page.source}</div></td>
-                    <td><div class="row">${page.author}</div></td>
+                    <td><div class="row"><input type="text" hidden>{{task.id}}</input></div></td>
+                    <td><div class="row">{{task.description}}</div></td>
+                    <td><div class="row">{{task.domain}}</div></td>
+                    <td><div class="row">{{task.href}}</div></td>
+                    <td><div class="row">{{task.status}}</div></td>
+                    <td><div class="row">{{task.createTime}}</div></td>
+                    <td><div class="row">{{task.modifyTime}}</div></td>
                     <td>
                         <div class="row">
-                            <a href="/page/query/id/${page.id}">查看</a>&nbsp;
-                            <a href="/page/copy/${page.id}">拷贝</a>
+                            <a href="/page/query/id/{{task.id}}">查看</a>&nbsp;
                         </div>
                     </td>
                 </tr>
             </table>
+            <input type="button" @click="getTask()" value="点我异步获取数据(Get)">
         </div>
+        <script type="text/javascript" src="../js/vue-2.6.8.js"></script>
+        <script type="text/javascript" src="../js/vue-resource-1.5.1.js"></script>
+        <script>
+            window.onload = function(){
+                var exampleData = {
+                    task: {
+                        id: 1001,
+                        description: "超强笔记",
+                        domain: "blog.csdn.net",
+                        href: "https://blog.csdn.net/m0_37106742/article/details/64438892",
+                        status: 1,
+                        createTime: "2019-03-08",
+                        modifyTime: "2019-03-08"
+                    }
+                };
+                new Vue({
+                    el: '#app',
+                    data: exampleData,
+                    // ready: function(){
+                    //     this.getTask()
+                    // },
+                    methods: {
+                        getTask: function(){
+                            this.$http.get("http://www.baidu.com").then(function(res){
+                                document.write(res.body)
+                            })
+                        }
+                    }
+                })
+            }
+        </script>
     </body>
 </html>

@@ -4,7 +4,6 @@ import com.crawler.crawler.model.CodeEntry;
 import com.crawler.crawler.model.Entry;
 import com.crawler.crawler.model.Task;
 import com.crawler.crawler.rules.CsdnRule;
-import com.crawler.service.CacheService;
 import com.crawler.service.CodeEntryService;
 import com.crawler.service.EntryService;
 import com.crawler.service.TaskService;
@@ -19,9 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
