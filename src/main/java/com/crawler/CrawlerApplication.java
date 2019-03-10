@@ -8,9 +8,12 @@ import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+@EnableWebMvc
 @SpringBootApplication
 //@Profile("dev")
 public class CrawlerApplication extends SpringBootServletInitializer implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
