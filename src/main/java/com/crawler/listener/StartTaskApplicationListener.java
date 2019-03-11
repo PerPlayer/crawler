@@ -16,7 +16,7 @@ public class StartTaskApplicationListener implements ApplicationListener<Context
         new Thread(){
             public void run() {
                 try {
-                    Crawler.main(null);
+//                    Crawler.main(null);
                 } catch (Exception e) {
                     logger.error("启动任务异常：{}", e.getMessage());
                 }

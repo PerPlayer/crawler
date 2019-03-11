@@ -50,7 +50,6 @@
             <input type="button" @click="getTask()" value="点我异步获取数据(Get)">
         </div>
         <script type="text/javascript" src="../js/vue.min-2.0.1.js"></script>
-        <!--<script type="text/javascript" src="../js/vue-2.6.8.js"></script>-->
         <script type="text/javascript" src="../js/axios.min.js"></script>
         <script>
             window.onload = function(){
@@ -67,25 +66,7 @@
                 };
                 new Vue({
                     el: '#app',
-                    data: {
-                        tasks: [{
-                            id: 1001,
-                            description: "超强笔记",
-                            domain: "blog.csdn.net",
-                            href: "https://blog.csdn.net/m0_37106742/article/details/64438892",
-                            status: 1,
-                            createTime: "2019-03-08",
-                            modifyTime: "2019-03-08"
-                        },{
-                            id: 1002,
-                            description: "超强笔记",
-                            domain: "blog.csdn.net",
-                            href: "https://blog.csdn.net/m0_37106742/article/details/64438892",
-                            status: 1,
-                            createTime: "2019-03-08",
-                            modifyTime: "2019-03-08"
-                        }]
-                    },
+                    data: exampleData,
                     mounted: function(){
                         this.getTask();
                     },

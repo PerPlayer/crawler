@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity
+@Entity(name = "crawler_task")
 @Data
 @NoArgsConstructor
 public class Task extends BaseEntity {

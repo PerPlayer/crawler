@@ -11,7 +11,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
-@Entity
+@Entity(name = "crawler_entry")
 @Data
 @NoArgsConstructor
 public class Entry extends BaseEntity {
