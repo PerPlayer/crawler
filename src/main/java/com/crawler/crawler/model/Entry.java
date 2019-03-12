@@ -33,5 +33,8 @@ public class Entry extends BaseEntity {
     @Column(name = "weight", length = 1)
     private int weight;
 
+    @Transient
+    private Task task;
+
     public interface EntryGroup{}
 }

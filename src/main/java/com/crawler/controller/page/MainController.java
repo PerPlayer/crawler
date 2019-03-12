@@ -16,4 +16,14 @@ public class MainController {
     public String main(){
         return "main";
     }
+
+    @RequestMapping("menu.html")
+    public String menu(){
+        return "menu";
+    }
+
+    @RequestMapping("task.html")
+    public String task(){
+        return "task";
+    }
 }

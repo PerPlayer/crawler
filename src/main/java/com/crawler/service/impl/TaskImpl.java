@@ -60,7 +60,10 @@ public class TaskImpl implements TaskService {
     @Override
     public Task findById(String id) {
         Optional<Task> taskOptional = repository.findById(id);
-        return taskOptional.get();
+        if (taskOptional.isPresent()) {
+            return taskOptional.get();
+        }
+        return null;
     }
 
     @Override

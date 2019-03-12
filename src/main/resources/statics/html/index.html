@@ -1,89 +1,224 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>首页</title>
 </head>
     <body>
         <style>
-            div{
-                /*border: 1px solid black;*/
+            .search{
+                margin: 0 auto;
+                text-align: center;
+            }
+            #search{
+                border: 1px solid gainsboro;
+                width: 500px;
+                height: 30px;
+                margin: 50px;
+                /*margin-left: 30px;*/
+                padding-right: 10px;
             }
             #app{
                 margin: 0 auto;
-                width: 90%;
+                width: 60%;
             }
             .row{
-                border-bottom: 1px solid darkgray;
+                /*border-bottom: 1px solid darkgray;*/
+                margin: 10px;
                 font-size: 18px;
-                height: 22px;
-                text-align: center;
+                /*height: 40px;*/
+                text-align: left;
+            }
+            .title{
+                color: #0d6aad;
+                font-size: 22px;
+            }
+            .domain{
+                color: #00a65a;
+                font-size: 15px;
+            }
+            .content{
+                margin: 4px;
+            }
+
+
+            body{
+            font-family:"Segoe UI";
+            }
+            li{
+                list-style:none;
+            }
+            a{
+                text-decoration:none;
+            }
+            .pagination {
+                position: relative;
+
+            }
+            .pagination li{
+                display: inline-block;
+                margin:0 5px;
+            }
+            .pagination li a{
+                padding:.5rem 1rem;
+                display:inline-block;
+                border:1px solid #ddd;
+                background:#fff;
+
+                color:#0E90D2;
+            }
+            .pagination li a:hover{
+                background:#eee;
+            }
+            .pagination li.active a{
+                background:#0E90D2;
+                color:#fff;
             }
         </style>
+
         <div  id="app">
+
+            <div class="search">
+                <input id = "search" type="text" v-model="search" placeholder="输入搜索内容"/><input type="button" @click="query()" value="搜索">
+            </div>
+
             <table cellpadding="4" cellspacing="0">
-                <tr>
-                    <th width="0">ID</th>
-                    <th width="12%">描述</th>
-                    <th width="20%">域名</th>
-                    <th width="12%">地址</th>
-                    <th width="10%">状态</th>
-                    <th width="18%">创建</th>
-                    <th width="18%">修改</th>
-                    <th width="10%">操作</th>
-                </tr>
-                <tr v-for="task in tasks">
-                    <td><div class="row"><input type="text" hidden>{{task.id}}</input></div></td>
-                    <td><div class="row">{{task.description}}</div></td>
-                    <td><div class="row">{{task.domain}}</div></td>
-                    <td><div class="row">{{task.href}}</div></td>
-                    <td><div class="row">{{task.status}}</div></td>
-                    <td><div class="row">{{task.createTime}}</div></td>
-                    <td><div class="row">{{task.modifyTime}}</div></td>
-                    <td>
-                        <div class="row">
-                            <a href="/page/query/id/{{task.id}}">查看</a>&nbsp;
+                <div v-for="entry in entries">
+                    <div class="row">
+                        <a class="title" :href="entry.task.href" target="_blank">{{entry.title}}</a>
+                        <div class="content">
+                            {{entry.createTime}} {{entry.content}}
                         </div>
-                    </td>
-                </tr>
+                        <div class="domain">
+                            {{entry.task.href}}
+                        </div>
+                    </div>
+                </div>
             </table>
-            <input type="button" @click="getTask()" value="点我异步获取数据(Get)">
+            <page></page>
         </div>
+
         <script type="text/javascript" src="../js/vue.min-2.0.1.js"></script>
         <script type="text/javascript" src="../js/axios.min.js"></script>
+
+        <script type="text/x-template" id="page">
+            <ul class="pagination" >
+                <li v-show="current != 1" @click="current-- && goto(current)" ><a href="#">上一页</a></li>
+                <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
+                    <a href="#" >{{index}}</a>
+                </li>
+                <li v-show="total != current && total != 0 " @click="current++ && goto(current++)"><a href="#" >下一页</a></li>
+            </ul>
+        </script>
+
         <script>
             window.onload = function(){
-                var exampleData = {
-                    task: {
-                        id: 1001,
-                        description: "超强笔记",
-                        domain: "blog.csdn.net",
-                        href: "https://blog.csdn.net/m0_37106742/article/details/64438892",
-                        status: 1,
-                        createTime: "2019-03-08",
-                        modifyTime: "2019-03-08"
-                    }
+                var oldSearch = "";
+                var defaultPage = {
+                    size: 10,
+                    current: 1,
+                    total: 10
                 };
-                new Vue({
+                var vue = new Vue({
                     el: '#app',
-                    data: exampleData,
+                    component: "",
+                    data: {
+                        search:'',
+                        page: {
+                            size: 10,
+                            current: 1,
+                            total: 10
+                        },
+                        entries: [{
+                            id: 1001,
+                            title: "超强笔记",
+                            content: ""
+                        }]
+                    },
                     mounted: function(){
-                        this.getTask();
+                        this.query();
                     },
                     methods: {
-                        getTask: function(){
+                        getEntry: function(){
                             self = this;
-                            axios.get('/perplayer/task/query/list')
+                            axios.get('/perplayer/entry/query?search='+self.search)
                                 .then(function (response) {
-                                    self.tasks = response.data;
+                                    self.entries = response.data;
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                });
+                        },
+                        query: function(){
+                            self = this;
+                            if(oldSearch != self.search){
+                                refresh();
+                                oldSearch = self.search;
+                                self.page = defaultPage;
+                            }
+                            var param = {};
+                            param.content = self.search;
+                            param.page = this.page;
+                            oldSearch = self.search;
+                            axios.post('/perplayer/entry/query/page', param)
+                                .then(function (response) {
+                                    self.page = response.data;
+                                    self.entries = response.data.list;
                                 })
                                 .catch(function (error) {
                                     console.log(error);
                                 });
                         }
                     }
-                })
-            }
+                });
+
+                refresh();
+
+                function refresh(){
+                    Vue.component("page",{
+                        template:"#page",
+                        data:function(){
+                            return{
+                                current:1,
+                                showItem:10,
+                                total:20
+                            }
+                        },
+                        computed:{
+                            pages:function(){
+                                var pag = [];
+                                if( this.current < this.showItem ){ //如果当前的激活的项 小于要显示的条数
+                                    //总页数和要显示的条数那个大就显示多少条
+                                    var i = Math.min(this.showItem,this.total);
+                                    while(i){
+                                        pag.unshift(i--);
+                                    }
+                                }else{ //当前页数大于显示页数了
+                                    var middle = this.current - Math.floor(this.showItem / 2 ),//从哪里开始
+                                        i = this.showItem;
+                                    if( middle >  (this.total - this.showItem)  ){
+                                        middle = (this.total - this.showItem) + 1
+                                    }
+                                    while(i--){
+                                        pag.push( middle++ );
+                                    }
+                                }
+                                return pag;
+                            }
+                        },
+                        methods:{
+                            goto:function(index){
+                                if(index == this.current) return;
+                                this.current = index;
+                                vue.page.current = index;
+                                vue.query();
+                                this.current = vue.page.current;
+                                this.total = vue.page.total;
+                            }
+                        }
+                    });
+                }
+            };
         </script>
     </body>
 </html>

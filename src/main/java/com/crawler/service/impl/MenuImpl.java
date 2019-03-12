@@ -11,12 +11,15 @@ import com.crawler.service.CacheService;
 import com.crawler.service.CodeEntryService;
 import com.crawler.service.MenuService;
 import com.crawler.util.EntityUtil;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class MenuImpl implements MenuService {
@@ -57,11 +60,13 @@ public class MenuImpl implements MenuService {
     @Override
     public List<MenuEntity> findAll() {
         List<MenuEntity> menus = repository.findAll();
-        for (MenuEntity entity : menus) {
-            if (entity.getType() == 0) {
-                entity.setChilds(repository.findByParentId(entity.getId()));
-            }
-        }
+//        menus.stream().filter((MenuEntity menuEntity) -> {
+//            boolean bool = menuEntity.getType() == 0;
+//            if (bool) {
+//                menuEntity.setChilds(repository.findByParentId(menuEntity.getId()));
+//            }
+//            return bool;
+//        }).collect(Collectors.toList());
         return menus;
     }
 

@@ -13,10 +13,10 @@ var menuItem = Vue.extend({
         '		<menu-item :item="item" v-for="item in item.childs"></menu-item>',
         '	</ul>',
 
-        // '	<a v-if="item.type === 1 && item.parentId === 0" :href="\'#\'+item.url">',
-        // '		<i v-if="item.icon != null" :class="item.icon"></i>',
-        // '		<span>{{item.name}}</span>',
-        // '	</a>',
+        '	<a v-if="item.type === 1 && item.parentId === 0" :href="\'#\'+item.url">',
+        '		<i v-if="item.icon != null" :class="item.icon"></i>',
+        '		<span>{{item.name}}</span>',
+        '	</a>',
 
         '	<a v-if="item.type === 1 && item.parentId != 0" :href="\'#\'+item.url">' +
 				'<i v-if="item.icon != null" :class="item.icon"></i>' +

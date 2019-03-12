@@ -2,10 +2,13 @@ package com.crawler.service.impl;
 
 import com.crawler.annonation.GroupValid;
 import com.crawler.crawler.model.Entry;
+import com.crawler.crawler.model.Task;
 import com.crawler.dao.EntryDao;
 import com.crawler.repository.EntryRepository;
 import com.crawler.service.EntryService;
+import com.crawler.service.TaskService;
 import com.crawler.util.EntityUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +25,9 @@ public class EntryImpl implements EntryService {
 
     @Autowired
     private EntryDao dao;
+
+    @Autowired
+    private TaskService taskService;
 
     @Override
     public Entry save(@GroupValid Entry entry) {
@@ -55,6 +61,24 @@ public class EntryImpl implements EntryService {
     @Override
     public Page<Entry> findAll(Pageable page) {
         return repository.findAll(page);
+    }
+
+    @Override
+    public Page<Entry> findAllByContent(String content, Pageable pageable) {
+        Page<Entry> entryPage = null;
+        if (StringUtils.isNotBlank(content)) {
+            entryPage = repository.findAllByContentLike("%"+content+"%", pageable);
+        }else{
+            entryPage = repository.findAll(pageable);
+        }
+        entryPage.forEach(entry -> {
+            if (entry.getContent().length() > 200) {
+                entry.setContent(entry.getContent().substring(0, 200));
+            }
+            Task task = taskService.findById(entry.getTaskId());
+            entry.setTask(task);
+        });
+        return entryPage;
     }
 
     @Override

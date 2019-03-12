@@ -2,7 +2,7 @@ var setting = {
     data: {
         simpleData: {
             enable: true,
-            idKey: "menuId",
+            idKey: "id",
             pIdKey: "parentId",
             rootPId: -1
         },
@@ -30,7 +30,7 @@ var vm = new Vue({
             //加载菜单树
             $.get(baseURL + "sys/menu/select", function(r){
                 ztree = $.fn.zTree.init($("#menuTree"), setting, r.menuList);
-                var node = ztree.getNodeByParam("menuId", vm.menu.parentId);
+                var node = ztree.getNodeByParam("id", vm.menu.parentId);
                 ztree.selectNode(node);
 
                 vm.menu.parentName = node.name;
@@ -154,7 +154,7 @@ var Menu = {
 Menu.initColumn = function () {
     var columns = [
         {field: 'selectItem', radio: true},
-        {title: '菜单ID', field: 'menuId', visible: false, align: 'center', valign: 'middle', width: '80px'},
+        {title: '菜单ID', field: 'id', visible: false, align: 'center', valign: 'middle', width: '80px'},
         {title: '菜单名称', field: 'name', align: 'center', valign: 'middle', sortable: true, width: '180px'},
         {title: '上级菜单', field: 'parentName', align: 'center', valign: 'middle', sortable: true, width: '100px'},
         {title: '图标', field: 'icon', align: 'center', valign: 'middle', sortable: true, width: '80px', formatter: function(item, index){
@@ -191,10 +191,10 @@ function getMenuId () {
 
 $(function () {
     var colunms = Menu.initColumn();
-    var table = new TreeTable(Menu.id, baseURL + "sys/menu/list", colunms);
+    var table = new TreeTable(Menu.id, baseURL + "menu/query/list", colunms);
     table.setExpandColumn(2);
-    table.setIdField("menuId");
-    table.setCodeField("menuId");
+    table.setIdField("id");
+    table.setCodeField("id");
     table.setParentCodeField("parentId");
     table.setExpandAll(false);
     table.init();

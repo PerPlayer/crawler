@@ -20,5 +20,7 @@ public interface EntryService {
 
     Page<Entry> findAll(Pageable page);
 
+    Page<Entry> findAllByContent(String content, Pageable pageable);
+
     Entry findById(String id);
 }

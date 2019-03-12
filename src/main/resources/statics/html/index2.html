@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+    <body>
+        <style>
+            div{
+                /*border: 1px solid black;*/
+            }
+            #app{
+                margin: 0 auto;
+                width: 90%;
+            }
+            .row{
+                border-bottom: 1px solid darkgray;
+                font-size: 18px;
+                height: 22px;
+                text-align: center;
+            }
+        </style>
+
+        <div  id="app">
+            <table cellpadding="4" cellspacing="0">
+                <tr>
+                    <th width="0">ID</th>
+                    <th width="12%">描述</th>
+                    <th width="20%">域名</th>
+                    <th width="12%">地址</th>
+                    <th width="10%">状态</th>
+                    <th width="18%">创建</th>
+                    <th width="18%">修改</th>
+                    <th width="10%">操作</th>
+                </tr>
+                <tr v-for="task in tasks">
+                    <td><div class="row"><input type="text" hidden>{{task.id}}</input></div></td>
+                    <td><div class="row">{{task.description}}</div></td>
+                    <td><div class="row">{{task.domain}}</div></td>
+                    <td><div class="row">{{task.href}}</div></td>
+                    <td><div class="row">{{task.status}}</div></td>
+                    <td><div class="row">{{task.createTime}}</div></td>
+                    <td><div class="row">{{task.modifyTime}}</div></td>
+                    <td>
+                        <div class="row">
+                            <a href="/page/query/id/{{task.id}}">查看</a>&nbsp;
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <input type="button" @click="getTask()" value="点我异步获取数据(Get)">
+        </div>
+        <script type="text/javascript" src="../js/vue.min-2.0.1.js"></script>
+        <script type="text/javascript" src="../js/axios.min.js"></script>
+        <script>
+            window.onload = function(){
+                var exampleData = {
+                    tasks: [{
+                        id: 1001,
+                        description: "超强笔记",
+                        domain: "blog.csdn.net",
+                        href: "https://blog.csdn.net/m0_37106742/article/details/64438892",
+                        status: 1,
+                        createTime: "2019-03-08",
+                        modifyTime: "2019-03-08"
+                    }]
+                };
+                new Vue({
+                    el: '#app',
+                    data: exampleData,
+                    mounted: function(){
+                        this.getTask();
+                    },
+                    methods: {
+                        getTask: function(){
+                            self = this;
+                            axios.get('/perplayer/task/query/list')
+                                .then(function (response) {
+                                    self.tasks = response.data;
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                });
+                        }
+                    }
+                })
+            }
+        </script>
+    </body>
+</html>

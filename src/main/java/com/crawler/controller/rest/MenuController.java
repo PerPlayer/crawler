@@ -21,4 +21,10 @@ public class MenuController {
         List<MenuEntity> menus = service.findAll();
         return B.ok().put("menuList", menus);
     }
+
+    @RequestMapping("/query/list")
+    public List<MenuEntity> queryList(){
+        List<MenuEntity> menus = service.findAll();
+        return menus;
+    }
 }
