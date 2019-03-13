@@ -14,6 +14,11 @@ spring:
     jpa:
       repositories:
         enabled: true
+    elasticsearch:
+      cluster-name: my-application
+      cluster-nodes: 127.0.0.1:9300
+      repositories:
+        enabled: true
   jpa:
     hibernate:
       ddl-auto: update
@@ -41,3 +46,5 @@ server:
     context-path: /perplayer
   tomcat:
     uri-encoding: UTF-8
+
+
