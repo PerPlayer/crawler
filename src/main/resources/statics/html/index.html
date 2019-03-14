@@ -89,11 +89,11 @@
                         <div class="content" v-html="entry.content">
                             {{entry.createTime}} {{entry.content}}
                         </div>
-                        <div class="domain" v-show="entry.task.href.length > 0">
-                            {{entry.task.href}}
+                        <div class="domain" v-if="entry.href != null">
+                            {{entry.href}}
                         </div>
                         <div class="domain" v-else>
-                            {{entry.href}}
+                            {{entry.task.href}}
                         </div>
                     </div>
                 </div>
