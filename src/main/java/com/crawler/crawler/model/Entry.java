@@ -36,5 +36,8 @@ public class Entry extends BaseEntity {
     @Transient
     private Task task;
 
+    @Transient
+    private String href;
+
     public interface EntryGroup{}
 }

@@ -85,12 +85,15 @@
             <table cellpadding="4" cellspacing="0">
                 <div v-for="entry in entries">
                     <div class="row">
-                        <a class="title" :href="entry.task.href" target="_blank">{{entry.title}}</a>
-                        <div class="content">
+                        <a class="title" :href="entry.title" target="_blank">{{entry.title}}</a>
+                        <div class="content" v-html="entry.content">
                             {{entry.createTime}} {{entry.content}}
                         </div>
-                        <div class="domain">
+                        <div class="domain" v-show="entry.task.href.length > 0">
                             {{entry.task.href}}
+                        </div>
+                        <div class="domain" v-else>
+                            {{entry.href}}
                         </div>
                     </div>
                 </div>
@@ -160,7 +163,7 @@
                             param.content = self.search;
                             param.page = this.page;
                             oldSearch = self.search;
-                            axios.post('/perplayer/entry/query/page', param)
+                            axios.post('/perplayer/entry/query/page/es', param)
                                 .then(function (response) {
                                     self.page = response.data;
                                     self.entries = response.data.list;

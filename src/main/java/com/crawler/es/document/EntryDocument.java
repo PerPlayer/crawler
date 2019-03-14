@@ -16,6 +16,8 @@ public class EntryDocument {
     private String title;
     @JsonProperty("content")
     private String content;
+    @JsonProperty("href")
+    private String href;
     @JsonProperty("taskId")
     private String taskId;
     @JsonProperty("weight")

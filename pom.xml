@@ -24,7 +24,7 @@
 		<boot.version>2.1.0.RELEASE</boot.version>
 		<selenium.version>3.14.0</selenium.version>
 		<joda-time.version>2.9.9</joda-time.version>
-		<elasticsearch>5.5.0</elasticsearch>
+		<elasticsearch>5.4.2</elasticsearch>
 	</properties>
 
 	<dependencies>
@@ -98,11 +98,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>druid</artifactId>
-			<version>1.1.12</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>com.alibaba</groupId>-->
+			<!--<artifactId>druid</artifactId>-->
+			<!--<version>1.1.12</version>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>

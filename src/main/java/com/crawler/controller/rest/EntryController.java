@@ -1,6 +1,7 @@
 package com.crawler.controller.rest;
 
 import com.crawler.crawler.model.Entry;
+import com.crawler.es.service.EsEntryService;
 import com.crawler.service.EntryService;
 import com.crawler.util.BPage;
 import com.crawler.util.Query;
@@ -18,6 +19,9 @@ public class EntryController {
     @Autowired
     private EntryService service;
 
+    @Autowired
+    private EsEntryService esEntryService;
+
     @GetMapping("/query")
     public List<Entry> list(@RequestParam("search") String search){
         Page<Entry> taskPage = service.findAllByContent(search, PageRequest.of(1, 10));
@@ -31,5 +35,12 @@ public class EntryController {
         page.setList(taskPage.getContent());
         page.setTotal(taskPage.getTotalElements()/page.getSize());
         return page;
+    }
+
+    @PostMapping("/query/page/es")
+    public BPage<Entry> esList(@RequestBody Query query){
+        BPage<Entry> page = query.getPage();
+        BPage<Entry> entryBPage = esEntryService.queryWithHighLight(query.getContent(), page);
+        return entryBPage;
     }
 }

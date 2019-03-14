@@ -60,8 +60,11 @@ public class EntryImpl implements EntryService {
 
     @Override
     public Page<Entry> findAll(Pageable page) {
-        return repository.findAll(page);
+        Page<Entry> entryPage = repository.findAll(page);
+        setTask(entryPage);
+        return entryPage;
     }
+
 
     @Override
     public Page<Entry> findAllByContent(String content, Pageable pageable) {
@@ -71,13 +74,7 @@ public class EntryImpl implements EntryService {
         }else{
             entryPage = repository.findAll(pageable);
         }
-        entryPage.forEach(entry -> {
-            if (entry.getContent().length() > 200) {
-                entry.setContent(entry.getContent().substring(0, 200));
-            }
-            Task task = taskService.findById(entry.getTaskId());
-            entry.setTask(task);
-        });
+        setTask(entryPage);
         return entryPage;
     }
 
@@ -85,5 +82,15 @@ public class EntryImpl implements EntryService {
     public Entry findById(String id) {
         Optional<Entry> elementOptional = repository.findById(id);
         return elementOptional.get();
+    }
+
+    private void setTask(Page<Entry> entryPage) {
+        entryPage.forEach(entry -> {
+            if (entry.getContent().length() > 200) {
+                entry.setContent(entry.getContent().substring(0, 200));
+            }
+            Task task = taskService.findById(entry.getTaskId());
+            entry.setTask(task);
+        });
     }
 }
