@@ -54,7 +54,7 @@ public class EsEntryImpl implements EsEntryService {
                 .highlighter(highlightBuilder)
                 .execute().actionGet();
         page.setList(convertEntry(response));
-        page.setTotal(response.getHits().totalHits);
+        page.setTotal(response.getHits().totalHits/page.getSize());
         return page;
     }
 
