@@ -1,5 +1,6 @@
 package com.crawler.es.service.impl;
 
+import com.crawler.annonation.Logger;
 import com.crawler.crawler.model.Entry;
 import com.crawler.es.document.EntryDocument;
 import com.crawler.es.repository.EsEntryRepo;
@@ -40,6 +41,7 @@ public class EsEntryImpl implements EsEntryService {
         repo.save(document);
     }
 
+    @Logger("es.list")
     @Override
     public BPage<Entry> queryWithHighLight(String content, BPage<Entry> page){
         HighlightBuilder highlightBuilder = new HighlightBuilder().field("content").requireFieldMatch(false);
@@ -70,7 +72,7 @@ public class EsEntryImpl implements EsEntryService {
             entry.setId(searchHit.getId());
             Map<String, Object> source = searchHit.getSource();
             entry.setTitle(source.get("title").toString());
-            entry.setContent(searchHit.getHighlightFields().get("content").fragments()[0].toString());
+            entry.setContent(searchHit.getHighlightFields().get("content").fragments()[0].toString().replaceAll("<(?!(/??span)).*?>", ""));
             entry.setHref(source.get("href").toString());
             entry.setCreateTime(new Date(Long.valueOf(source.get("createTime").toString())));
             entries.add(entry);

@@ -24,7 +24,7 @@
 		<boot.version>2.1.0.RELEASE</boot.version>
 		<selenium.version>3.14.0</selenium.version>
 		<joda-time.version>2.9.9</joda-time.version>
-		<elasticsearch>5.4.2</elasticsearch>
+		<elasticsearch>5.6.15</elasticsearch>
 	</properties>
 
 	<dependencies>

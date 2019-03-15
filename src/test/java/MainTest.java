@@ -3,18 +3,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 public class MainTest {
 
     public static void main(String[] args) throws NoSuchMethodException {
-        Random random = new Random();
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
-        System.out.println(random.nextInt(10));
+        String regex = "^.*?(?<=cn)$";
+        Pattern pattern = Pattern.compile(regex);
+        String input = "sina.com.cn";
+        System.out.println(pattern.matcher(input).matches());
+//        System.out.println(input.replaceAll(regex, ""));
     }
 }
