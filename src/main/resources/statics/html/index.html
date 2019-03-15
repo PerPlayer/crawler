@@ -163,7 +163,7 @@
                             param.content = self.search;
                             param.page = this.page;
                             oldSearch = self.search;
-                            axios.post('/perplayer/entry/query/page/es', param)
+                            axios.post('/perplayer/entry/query/page/es', param, {headers: {"X-Requested-With": "XMLHttpRequest"}})
                                 .then(function (response) {
                                     self.page = response.data;
                                     self.entries = response.data.list;
