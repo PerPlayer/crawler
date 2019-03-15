@@ -7,6 +7,7 @@ import com.crawler.service.LogService;
 import com.crawler.util.EntityUtil;
 import com.crawler.util.HttpContextUtils;
 import com.crawler.util.IPUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -43,7 +44,9 @@ public class LogAspect {
         Logger annotation = signature.getMethod().getAnnotation(Logger.class);
         logEntity.setOperation(annotation.value());
 
-        logEntity.setParams(JSON.toJSONString(joinPoint.getArgs()));
+        Object[] args = joinPoint.getArgs();
+        logEntity.setParams(JSON.toJSONString(
+                ArrayUtils.subarray(args, 0, args.length - 1)));
         HttpServletRequest request = HttpContextUtils.getHttpServletRequest();
         logEntity.setIp(IPUtils.getIpAddr(request));
 
