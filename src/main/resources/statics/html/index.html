@@ -85,7 +85,7 @@
             <table cellpadding="4" cellspacing="0">
                 <div v-for="entry in entries">
                     <div class="row">
-                        <a class="title" :href="entry.title" target="_blank">{{entry.title}}</a>
+                        <a class="title" :href="entry.href" target="_blank">{{entry.title}}</a>
                         <div class="content" v-html="entry.content">
                             {{entry.createTime}} {{entry.content}}
                         </div>
