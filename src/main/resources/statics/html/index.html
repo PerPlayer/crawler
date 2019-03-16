@@ -6,9 +6,10 @@
 </head>
     <body>
         <style>
-            .search{
+            .center{
                 margin: 0 auto;
                 text-align: center;
+                margin-top: 20px;
             }
             #search{
                 border: 1px solid gainsboro;
@@ -78,13 +79,13 @@
 
         <div  id="app">
 
-            <div class="search">
+            <div class="center">
                 <input id = "search" type="text" v-model="search" @keyup.enter="query()" placeholder="输入搜索内容"/>
                 <input type="button" @click="query()" value="搜索">
             </div>
 
-            <table cellpadding="4" cellspacing="0">
-                <div v-for="entry in entries">
+            <table cellpadding="4" cellspacing="0" class="center">
+                <div v-for="entry in entries" class="center">
                     <div class="row">
                         <a class="title" :href="entry.href" target="_blank">{{entry.title}}</a>
                         <div class="content" v-html="entry.content">
@@ -99,7 +100,7 @@
                     </div>
                 </div>
             </table>
-            <page></page>
+            <page class="center" v-show="entries.length > 0"></page>
         </div>
 
         <script type="text/javascript" src="../js/vue.min-2.0.1.js"></script>
