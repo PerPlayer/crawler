@@ -164,6 +164,7 @@
                             var param = {};
                             param.content = self.search;
                             param.page = this.page;
+                            param.page.list = [];
                             oldSearch = self.search;
                             axios.post('/perplayer/entry/query/page/es', param, {headers: {"X-Requested-With": "XMLHttpRequest"}})
                                 .then(function (response) {
