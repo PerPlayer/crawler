@@ -1,18 +1,23 @@
+import com.crawler.CrawlerApplication;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
 public class SeleniumTest {
 
-
     private static ChromeDriver browser;
 
     @Before
     public void openBrowser() {
+        CrawlerApplication.main(new String[]{});
         System.setProperty("webdriver.chrome.driver", "D:\\central\\chromedriver.exe");
         browser = new ChromeDriver();
         browser.manage().timeouts()
@@ -21,6 +26,7 @@ public class SeleniumTest {
 
     @Test
     public void mainTest() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(6);
         browser.get("http://localhost/perplayer/statics/html/index.html");
         search("spring");
         search("redis");
@@ -42,6 +48,7 @@ public class SeleniumTest {
     @After
     public void closeBrowser(){
         browser.quit();
+        CrawlerApplication.exit();
     }
 
 }

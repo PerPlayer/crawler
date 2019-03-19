@@ -1,10 +1,18 @@
 spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       first:  #数据源1
-        url: jdbc:mysql://db-server:3306/test?characterEncoding=UTF-8
+        url: jdbc:mysql://localhost:3306/test?characterEncoding=UTF-8
         username: root
         password: tiger
   data:
@@ -13,7 +21,7 @@ spring:
         enabled: true
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: es:9300
+      cluster-nodes: 47.101.189.129:9300
       repositories:
         enabled: true
   jpa:
@@ -31,6 +39,8 @@ spring:
     charset: UTF-8
     settings:
       number_format: '0.##'
+  main:
+    banner-mode: console
 #  profiles:
 #    active: dev
 #mybatis:
@@ -43,5 +53,6 @@ server:
     context-path: /perplayer
   tomcat:
     uri-encoding: UTF-8
-
-
+crawler:
+  cluster: false
+  globalSessionTimeout: 3600
