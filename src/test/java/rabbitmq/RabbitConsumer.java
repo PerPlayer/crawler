@@ -1,6 +1,8 @@
 package rabbitmq;
 
 import com.rabbitmq.client.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +13,10 @@ public class RabbitConsumer {
     private static final String IP_ADDRESS = "47.101.189.129";
     private static final int PORT = 5672;
 
-    public static void main(String[] args) throws Exception {
+    private Connection connection = null;
+
+    @Before
+    public void before() throws Exception {
         Address[] addresses = {
                 new Address(IP_ADDRESS, PORT)
         };
@@ -20,7 +25,11 @@ public class RabbitConsumer {
         factory.setUsername("guest");
         factory.setPassword("guest");
 
-        Connection connection = factory.newConnection(addresses);
+        connection = factory.newConnection(addresses);
+    }
+
+    @Test
+    public void receiveTest() throws Exception {
         Channel channel = connection.createChannel();
         channel.basicQos(64);//设置客户端最多接收未被ack的消息个数
         DefaultConsumer consumer = new DefaultConsumer(channel) {
@@ -32,7 +41,7 @@ public class RabbitConsumer {
                                        byte[] body) throws IOException {
                 System.out.println("recv message: " + new String(body));
                 try {
-                    TimeUnit.SECONDS.sleep(3);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
