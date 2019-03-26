@@ -32,12 +32,12 @@ public class RabbitProducer {
     @Test
     public void sendTest() throws Exception {
         Channel channel = connection.createChannel();
-        initMQ(channel);
-        channel.exchangeDeclare(EXCHANGE_NAME, "direct", true, false, null);
-        HashMap<String, Object> args = new HashMap<>();
-        args.put("x-message-ttl", 10000);//设置消息队列的过期时间，单位：毫秒
-        channel.queueDeclare(QUEUE_NAME, true, false, false, args);
-        channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
+//        initMQ(channel);
+//        channel.exchangeDeclare(EXCHANGE_NAME, "direct", true, false, null);
+//        HashMap<String, Object> args = new HashMap<>();
+//        args.put("x-message-ttl", 10000);//设置消息队列的过期时间，单位：毫秒
+//        channel.queueDeclare(QUEUE_NAME, true, false, false, args);
+//        channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
         String message = "你好!";
         channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
         System.out.println("done...");
@@ -79,6 +79,12 @@ public class RabbitProducer {
         System.out.println("done...");
         channel.close();
         connection.close();
+    }
+
+    public void sendWithConfirmChannelTest() throws Exception {
+        Channel channel = connection.createChannel();
+        channel.confirmSelect();
+
     }
 
     private void initMQ(Channel channel) throws Exception{
