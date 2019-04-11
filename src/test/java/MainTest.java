@@ -21,5 +21,7 @@ public class MainTest {
         Pattern pattern = Pattern.compile(regex);
         String input = "sina.com.cn";
         System.out.println(pattern.matcher(input).matches());
+        String path = "/ab/lock-0000000062";
+        System.out.println(path.substring(path.lastIndexOf("/") + 6));
     }
 }

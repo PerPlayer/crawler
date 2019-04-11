@@ -28,7 +28,7 @@
 		<shiro.version>1.4.0</shiro.version>
 		<kaptcha.version>0.0.9</kaptcha.version>
 		<jedis.version>2.9.0</jedis.version>
-		<curator.version>4.0.1</curator.version>
+		<curator.version>2.12.0</curator.version>
 	</properties>
 
 	<dependencies>
