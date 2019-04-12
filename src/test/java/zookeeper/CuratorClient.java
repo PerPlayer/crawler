@@ -27,6 +27,8 @@ public class CuratorClient {
         );
         client.start();
         String lock = client.create().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(PATH + "/lock");
+        client.create().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(PATH + "/lock");
+        client.create().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(PATH + "/lock");
         System.out.println("Create znode: " + lock);
         PathChildrenCache cache = new PathChildrenCache(client, PATH, true);
         cache.start();
@@ -49,6 +51,7 @@ public class CuratorClient {
                 }
             }
         });
+        cache.close();
         TimeUnit.SECONDS.sleep(Integer.MAX_VALUE);
     }
 

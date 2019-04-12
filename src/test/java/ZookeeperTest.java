@@ -15,12 +15,13 @@ public class ZookeeperTest {
 
     public static void main(String[] args) throws Exception {
         CreateGroup group = CreateGroup.newGroup(ADDRESS);
-        group.joinWithEphAndSeq(GROUP, "csdn-");
+        group.delete("/crawler/lock0000000085");
+        /*group.joinWithEphAndSeq(GROUP, "csdn-");
 
         group.list(GROUP).forEach((String path) -> {
             System.out.println(path);
         });
-        Thread.sleep(Long.MAX_VALUE);
+        Thread.sleep(Long.MAX_VALUE);*/
     }
 
     private static void lock(CreateGroup group, String path){
