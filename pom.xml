@@ -32,6 +32,7 @@
 	</properties>
 
 	<dependencies>
+		<!-- 项目启动有log异常就把这两个注了 -->
 		<dependency>
 			<groupId>com.github.pagehelper</groupId>
 			<artifactId>pagehelper</artifactId>
