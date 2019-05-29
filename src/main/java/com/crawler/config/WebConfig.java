@@ -4,6 +4,7 @@ import com.crawler.extend.HandlerExceptionResolverExtend;
 import com.crawler.extend.InjectCurrentUserHandler;
 import com.crawler.listener.StartTaskApplicationListener;
 import com.crawler.util.ApplicationContextUtil;
+import com.google.common.collect.Lists;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,10 +14,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +51,20 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/statics/**")
                 .addResourceLocations("classpath:/statics/");
+    }
+
+    //解决json could not find acceptable representation异常
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.strategies(Lists.newArrayList(webRequest -> {
+            MediaType mediaType = MediaType.ALL;
+            HttpServletRequest request = (HttpServletRequest)webRequest.getNativeRequest();
+            String servletPath = request.getServletPath();
+            if (servletPath.startsWith("/actuator")) {
+                mediaType = MediaType.APPLICATION_JSON_UTF8;
+            }
+            return Lists.newArrayList(mediaType);
+        }));
     }
 
     // json转换器

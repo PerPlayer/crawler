@@ -78,3 +78,8 @@ crawler:
   cluster: false
   globalSessionTimeout: 3600
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env, beans, info, configprops

@@ -73,6 +73,7 @@ public class ShiroConfig {
 
         filterMap.put("/statics/html/index.html", "anon");
         filterMap.put("/statics/**", "anon");
+        filterMap.put("/actuator/**", "anon");
         filterMap.put("/login.html", "anon");
         filterMap.put("/sys/login", "anon");
         filterMap.put("/entry/query/page/es", "anon");

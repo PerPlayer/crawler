@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 //@Profile("dev")
 public class CrawlerApplication extends SpringBootServletInitializer implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
-    static ConfigurableApplicationContext applicationContext = null;
+    private static ConfigurableApplicationContext applicationContext = null;
 
     public static void main(String[] args) {
         applicationContext = SpringApplication.run(CrawlerApplication.class, args);
