@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: crawler
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -82,4 +84,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: env, beans, info, configprops
+        include: env, beans, info, configprops, metrics, health, shutdown
+  endpoint:
+    shutdown:
+      enabled: true
+
+info.app.name: crawler
