@@ -14,7 +14,9 @@ import java.util.regex.Pattern;
 
 public class Engine {
 
-    private static final String REG_HTTP = "\"((?:http|https):.*?)\"";
+    private static final String REG_HTTP = "\"((?:http:|https:|//).*?)\"";
+    private static final String REG_TITLE = "<title>(.*)</title>";
+    private static final String REG_CONTENT = "<div.*?(?:id|class)[ ='\"]+?%s['\"]+?.*?>(.*?)</div>";
 
     private static final Pattern PATTERN;
 
@@ -28,6 +30,37 @@ public class Engine {
 
     static{
         PATTERN = Pattern.compile(REG_HTTP);
+    }
+
+    public static String title(String text){
+        Pattern pattern = Pattern.compile(REG_TITLE);
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            String group = matcher.group(1);
+            return group.substring(0, group.indexOf("|"));
+        }
+        return null;
+    }
+
+    public static String content(String key, String text){
+        String textInALine = clearLineChar(text);
+        Pattern pattern = Pattern.compile(String.format(REG_CONTENT, key));
+        Matcher matcher = pattern.matcher(textInALine);
+        if (matcher.find()) {
+            return postProcess(matcher.group(1));
+        }
+        return null;
+    }
+
+    private static String clearLineChar(String text) {
+        return text.replaceAll("(?:\n|\r)", "");
+    }
+
+    private static String postProcess(String text){
+        String s1 = text.replaceAll("(?:</.*?>|\t|　| )", "");
+        String s2 = s1.replaceAll("<p>", System.lineSeparator() + "  ");
+        String s3 = s2.replaceAll("<.*>", "");
+        return s3;
     }
 
     public static Collection<String> urls(String text){
@@ -56,6 +89,9 @@ public class Engine {
         while (matcher.find()) {
             String group = matcher.group(1);
             if (filter(group)) {
+                if (group.startsWith("/")) {
+                    group = "http:" + group;
+                }
                 urls.add(group);
             }
         }
