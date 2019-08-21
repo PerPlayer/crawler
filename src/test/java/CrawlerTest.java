@@ -1,6 +1,8 @@
 import com.crawler.engine.Executor;
 import com.crawler.engine.FileManager;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.IOException;
@@ -17,7 +19,7 @@ import static com.crawler.util.http.HttpUtil.get;
 
 public class CrawlerTest {
 
-    private static final String URL = "http://k.sina.com.cn/article_7053521592_1a46c32b800100j5hx.html?cre=tianyi&mod=pcpager_society&loc=7&r=9&rfunc=55&tj=none&tr=9";
+    private static final String URL = "https://www.meitulu.com/item/18222.html";
     private static final String FILE_PATH = "E://tmp/";
     private static final String FILE_NAME = "tmp.txt";
     private static final String KEY = "article";
@@ -27,7 +29,7 @@ public class CrawlerTest {
 //        pullContent();
 //        exec(FileManager.readString(FILE_NAME));
 //        pullAll(FileManager.readString(FILE_NAME));
-//        test();
+//        test();19913392936
         System.out.println("Done...");
         System.exit(0);
     }
@@ -91,8 +93,12 @@ public class CrawlerTest {
             System.out.println(iurl);
             CloseableHttpResponse response = null;
             String fileName = iurl.substring(iurl.lastIndexOf("/") + 1);
+            fileName = fileName.replace(".", System.currentTimeMillis()+".");
             try {
-                response = client.execute(get(iurl));
+                HttpGet request = get(iurl);
+                request.setHeader(HttpHeaders.HOST, "mtl.ttsqgs.com");
+                request.setHeader(HttpHeaders.REFERER, "https://www.meitulu.com/item/18222.html");
+                response = client.execute(request);
                 InputStream inputStream = response.getEntity().getContent();
                 byte[] bytes = new byte[1024*4];
                 int t = 0;

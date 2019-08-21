@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class Engine {
 
-    private static final String REG_HTTP = "\"((?:http:|https:|//).*?)\"";
+    private static final String REG_HTTP = "\"((?:http:|https:|//|/).*?)\"";
     private static final String REG_TITLE = "<title>(.*)</title>";
     private static final String REG_CONTENT = "<div.*?(?:id|class)[ ='\"]+?%s['\"]+?.*?>(.*?)</div>";
     private static final String REG_PAGE = "^((?!jpg|png|jpeg|gif|bmp|tif|svg).)*$";
@@ -96,9 +96,6 @@ public class Engine {
             while (matcher.find()) {
                 String group = matcher.group(1);
                 if (filter(group)) {
-                    if (group.startsWith("/")) {
-                        group = "http:" + group;
-                    }
                     urls.add(group);
                 }
             }
