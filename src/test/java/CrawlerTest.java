@@ -1,13 +1,13 @@
-import com.crawler.engine.Engine;
+import com.crawler.engine.Executor;
 import com.crawler.engine.FileManager;
-import com.google.common.collect.Lists;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,24 +17,24 @@ import static com.crawler.util.http.HttpUtil.get;
 
 public class CrawlerTest {
 
-    private static final String URL = "http://www.imobile.com.cn/";
+    private static final String URL = "http://k.sina.com.cn/article_7053521592_1a46c32b800100j5hx.html?cre=tianyi&mod=pcpager_society&loc=7&r=9&rfunc=55&tj=none&tr=9";
     private static final String FILE_PATH = "E://tmp/";
-    private static final String FILE_NAME = "aaa.txt";
-
+    private static final String FILE_NAME = "tmp.txt";
+    private static final String KEY = "article";
 
     public static void main(String[] args) throws Exception{
-        pullContent();
+        Executor.executor().execute(URL, KEY);
+//        pullContent();
 //        exec(FileManager.readString(FILE_NAME));
-        pullAll(FileManager.readString(FILE_NAME));
+//        pullAll(FileManager.readString(FILE_NAME));
 //        test();
         System.out.println("Done...");
         System.exit(0);
     }
 
     private static void test(){
-        Pattern pattern = Pattern.compile("<div.*?(?:id|class)[ ='\"]+?article['\"]+?.*?>(.*?)</div>");
-        Matcher matcher = pattern.matcher("df\"https:aaa.<div class=\"article\" id=\"artbody\">com<title>abc</title>d</div>f\"sdf\"http:bbb.comlsdf");
-
+        Pattern pattern = Pattern.compile("<div.*?(?:id|class)[ ='\"]+?(?!)article['\"]+?.*?>(.*?)</div>");
+        Matcher matcher = pattern.matcher("df\"https:aaa.<div class=\"Article\" id=\"artbody\">com<title>abc</title>d</div>f\"sdf\"http:bbb.comlsdf");
         while (matcher.find()) {
             System.out.println(matcher.group(1));
         }
@@ -43,9 +43,11 @@ public class CrawlerTest {
     private static void exec(String text){
         long start = System.currentTimeMillis();
         System.out.println(title(text));
-        System.out.println(content("article", text));
-//        Collection<String> urls = urls(text);;
-//        urls.forEach(url->System.out.println(url));
+        System.out.println(content(KEY, text));
+        Collection<String> urls = pages(text);
+        urls.forEach(url->System.out.println(url));
+        urls = images(text);
+        urls.forEach(url->System.out.println(url));
 //        System.out.println(urls.size());
         System.out.println(System.currentTimeMillis()-start);
     }
@@ -66,8 +68,23 @@ public class CrawlerTest {
     private static void pullAll(String text) throws Exception{
         String title = title(text);
         String path = FILE_PATH + title + "/";
-//        String article = content("article", text);
-//        FileManager.save(path, title + ".txt", article.getBytes("UTF-8"));
+        saveContent(path, title, text);
+        saveImage(path, text);
+
+    }
+
+    private static void saveContent(String path, String title, String text){
+        String article = content(KEY, text);
+        if (article != null) {
+            try {
+                FileManager.save(path, title + ".txt", article.getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void saveImage(String path, String text){
         Collection<String> images = images(text);
         CloseableHttpClient client = client();
         images.forEach(iurl->{
@@ -78,12 +95,9 @@ public class CrawlerTest {
                 response = client.execute(get(iurl));
                 InputStream inputStream = response.getEntity().getContent();
                 byte[] bytes = new byte[1024*4];
-                while (inputStream.read(bytes) != -1) {
-                    inputStream.read(bytes);
-                    FileManager.save(path, fileName, bytes);
-                }
-                if (bytes[0] != 0) {
-                    FileManager.save(path, fileName, bytes);
+                int t = 0;
+                while ((t = inputStream.read(bytes)) != -1) {
+                    FileManager.save(path, fileName, Arrays.copyOfRange(bytes, 0, t));
                 }
                 inputStream.close();
             } catch (IOException e) {
@@ -92,4 +106,5 @@ public class CrawlerTest {
         });
         System.out.println(images.size());
     }
+
 }

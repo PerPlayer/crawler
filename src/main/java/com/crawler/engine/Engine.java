@@ -11,14 +11,19 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Engine {
 
     private static final String REG_HTTP = "\"((?:http:|https:|//).*?)\"";
     private static final String REG_TITLE = "<title>(.*)</title>";
     private static final String REG_CONTENT = "<div.*?(?:id|class)[ ='\"]+?%s['\"]+?.*?>(.*?)</div>";
+    private static final String REG_PAGE = "^((?!jpg|png|jpeg|gif|bmp|tif|svg).)*$";
+    private static final String REG_IMAGE = "\"((?:http:|https:|//).*?(?:jpg|png|jpeg|gif|bmp|tif|svg).*?)\"";
 
-    private static final Pattern PATTERN;
+    private static final Pattern PATTERN_HTTP;
+    private static final Pattern PATTERN_PAGE;
+    private static final Pattern PATTERN_IMAGE;
 
     private static final String[] IGNORES = {".js", "com", "com/", "cn", "cn/", ".css"};
 
@@ -29,7 +34,9 @@ public class Engine {
     private static Predicate<String> FILTER = null;
 
     static{
-        PATTERN = Pattern.compile(REG_HTTP);
+        PATTERN_HTTP = Pattern.compile(REG_HTTP, Pattern.CASE_INSENSITIVE);
+        PATTERN_PAGE = Pattern.compile(REG_PAGE, Pattern.CASE_INSENSITIVE);
+        PATTERN_IMAGE = Pattern.compile(REG_IMAGE, Pattern.CASE_INSENSITIVE);
     }
 
     public static String title(String text){
@@ -37,7 +44,10 @@ public class Engine {
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
             String group = matcher.group(1);
-            return group.substring(0, group.indexOf("|"));
+            if (group.contains("|")) {
+                return group.substring(0, group.indexOf("|"));
+            }
+            return group;
         }
         return null;
     }
@@ -64,37 +74,35 @@ public class Engine {
     }
 
     public static Collection<String> urls(String text){
-        String[] strings = text.split(System.lineSeparator());
-        Set<String> urls = Sets.newHashSet();
-        Arrays.asList(strings).forEach(str->{
-            urls.addAll(fetchUrl(str));
-        });
-        return urls;
+        return fetchUrl(PATTERN_HTTP, text);
     }
 
     public static Collection<String> images(String text) {
-        Collection<String> urls = urls(text);
-        List<String> images = Lists.newArrayList();
-        urls.forEach(url->Arrays.asList(SUFFIX_IMAGE).forEach(suffix->{
-                if (url.endsWith(suffix) || url.endsWith(suffix.toUpperCase())) {
-                    images.add(url);
-                }
-            }));
-        return images;
+        return fetchUrl(PATTERN_IMAGE, text);
     }
 
-    private static List<String> fetchUrl(String text){
-        Matcher matcher = PATTERN.matcher(text);
-        List<String> urls = Lists.newArrayList();
-        while (matcher.find()) {
-            String group = matcher.group(1);
-            if (filter(group)) {
-                if (group.startsWith("/")) {
-                    group = "http:" + group;
+    public static Collection<String> pages(String text){
+        Collection<String> urls = urls(text);
+        return urls.stream().filter(url->{
+            return PATTERN_PAGE.matcher(url).find();
+        }).collect(Collectors.toList());
+    }
+
+    private static Collection<String> fetchUrl(Pattern pattern, String text){
+        String[] strings = text.split(System.lineSeparator());
+        Set<String> urls = Sets.newHashSet();
+        Arrays.asList(strings).forEach(str->{
+            Matcher matcher = pattern.matcher(text);
+            while (matcher.find()) {
+                String group = matcher.group(1);
+                if (filter(group)) {
+                    if (group.startsWith("/")) {
+                        group = "http:" + group;
+                    }
+                    urls.add(group);
                 }
-                urls.add(group);
             }
-        }
+        });
         return urls;
     }
 
