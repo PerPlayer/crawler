@@ -27,7 +27,7 @@ public class Engine {
     private static final Pattern PATTERN_PAGE;
     private static final Pattern PATTERN_IMAGE;
 
-    private static final String[] IGNORES = {".js", "com", "com/", "cn", "cn/", ".css"};
+    private static final String[] IGNORES = {".js", "com", "com/", "cn", "cn/", ".css", "dtd"};
 
     private static final String[] SUFFIX_IMAGE = {"jpg", "png", "jpeg", "gif", "bmp", "tif", "svg"};
 

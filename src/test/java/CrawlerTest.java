@@ -21,7 +21,7 @@ import static com.crawler.util.http.HttpUtil.get;
 
 public class CrawlerTest {
 
-    private static final String URL = "https://news.sina.com.cn/";
+    private static final String URL = "https://www.meitulu.com/item/18222.html";
     private static final String FILE_PATH = "E://tmp/";
     private static final String FILE_NAME = "tmp.txt";
     private static final String KEY = "article";

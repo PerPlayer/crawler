@@ -8,6 +8,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -17,9 +18,14 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -33,6 +39,7 @@ public class Executor {
 
     private static int TEXT_SIZE = 1024*16;
     private static int IMG_SIZE = 1024*64;
+    private static int LIMIT_SIZE = 1024*100;
     private static String HOST = "http://localhost/";
     private static final String TMP_PATH = "E://tmp/tmp/";
     private static final String URL_PATH = "E://tmp/url/";
@@ -40,6 +47,8 @@ public class Executor {
     private static final String FILE_PATH = "E://tmp/file/";
     private static final String FILE_NAME = "tmp";
     private static final HttpClient client = client();
+
+    private ExecutorService poolExecutor = Executors.newFixedThreadPool(4);
 
     private static Executor executor = new Executor();
 
@@ -69,13 +78,67 @@ public class Executor {
     }
 
     public void execute(String url, String key){
-        pullText(TMP_PATH, url);
+//        pullText(TMP_PATH, url);
 
-        fetchUrl();
-        downloadImg();
-        downloadUrl();
+        try {
+            poolExecutor.submit(()->{
+                while (true) {
+                    TimeUnit.SECONDS.sleep(1);
+                    fetchUrl();
+                    Path p = Paths.get(TMP_PATH);
+                    Files.list(p).forEach(path -> {
+                        if (Files.isDirectory(path.toAbsolutePath())) {
+                            try {
+                                Files.list(path).forEach(path1 -> {
+                                    try {
+                                        Files.move(path1, Paths.get(p.toString() + "/" + path1.getFileName()), StandardCopyOption.ATOMIC_MOVE);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return;
+                        }
+                    });
+                    clearDirectory(TMP_PATH);
+                }
+            });
+            poolExecutor.submit(()->{
+                while (true) {
+                    TimeUnit.SECONDS.sleep(1);
+                    downloadImg();
+                    clearDirectory(FILE_PATH);
+                }
+            }).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        downloadUrl();
+//        fetchUrl();
+//        downloadImg();
+        clearDirectory(FILE_PATH);
+
+//        downloadUrl();
+    }
+
+    private void clearDirectory(String path) {
+        Path p = Paths.get(path);
+        try {
+            Files.list(p).forEachOrdered(pa->{
+                if (Files.isDirectory(pa) && pa.toFile().list().length<1) {
+                    try {
+                        logger.info("删除空目录> {}", pa);
+                        Files.delete(pa);
+                    } catch (IOException e) {
+                        logger.info("删除空目录> {} 异常> {}", pa, e);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void downloadUrl(){
@@ -125,7 +188,7 @@ public class Executor {
                 try {
                     logger.info("删除文件> {}", cpath.getFileName());
                     Files.delete(cpath);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     logger.info("删除文件> {} 异常> {}", cpath.getFileName(), e.getMessage());
                 }
             });
@@ -140,8 +203,7 @@ public class Executor {
         try {
             logger.info("开始请求> {}", fileUrl);
             HttpGet request = get(fileUrl);
-//                            request.setHeader(HttpHeaders.HOST, "mtl.ttsqgs.com");
-//                            request.setHeader(HttpHeaders.REFERER, "https://www.meitulu.com/item/18222.html");
+            request.setHeader(HttpHeaders.REFERER, "https://www.meitulu.com/item/18222.html");
             response = client.execute(request);
             logger.info("请求响应> {}", response.getStatusLine());
             InputStream inputStream = response.getEntity().getContent();
@@ -151,6 +213,14 @@ public class Executor {
                 FileManager.save(filePath, fileName, Arrays.copyOfRange(bytes, 0, t));
             }
             inputStream.close();
+            Path path = Paths.get(filePath + fileName);
+            long size = Files.size(path);
+            if (fileName.matches("^.*(?:jpg|png|jpeg|gif|bmp|tif|svg)$") && size < LIMIT_SIZE) {
+                logger.info("删除文件> {}", path);
+                Files.delete(path);
+                return;
+            }
+            logger.info("{} 下载完成 > {}kb", path, String.format("%.1f", size/1024f));
         } catch (Exception e) {
             logger.info("下载文件> {} 异常> {}", fileUrl, e.getMessage());
         }
@@ -170,10 +240,10 @@ public class Executor {
     private void waitForSave(String path) throws IOException, InterruptedException {
         Path p = Paths.get(path);
         int length = p.toFile().list().length;
-        if (length >50) {
+        if (length >150) {
             logger.info("目录> {} 当前文件数量> {}, 线程> {} 进入等待", path, length, Thread.currentThread().getName());
             while (true) {
-                if (Files.size(p)<=50) {
+                if (Files.size(p)<=150) {
                     break;
                 }
                 TimeUnit.MICROSECONDS.sleep(1L);
@@ -186,7 +256,7 @@ public class Executor {
         Path path = Paths.get(TMP_PATH);
         try {
             Files.list(path).forEachOrdered(cpath->{
-                if (Files.exists(cpath)) {
+                if (Files.exists(cpath)&&!Files.isDirectory(cpath)) {
                     logger.info("从> {} 提取URL地址", cpath.toAbsolutePath().getFileName());
                     synchronized(cpath.getFileName()){
                         String text = getText(cpath);
@@ -196,8 +266,9 @@ public class Executor {
                         Collection<String> images = images(text);
                         logger.info("提取到图片地址> {}个", images.size());
                         try {
-                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
+//                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
                             saveFile(IMG_PATH, title, fillUrl(images).getBytes("UTF-8"));
+                            Files.delete(cpath);
                         } catch (Exception e) {
                             logger.info("保存> {} URL地址异常> {}", title, e.getMessage());
                         }
@@ -237,6 +308,7 @@ public class Executor {
                 baos.write(byteBuffer.array(), 0, b);
                 byteBuffer.flip();
             }
+            fileChannel.close();
             return new String(baos.toByteArray());
         } catch (IOException e) {
             logger.info("读取> {} 内容异常: {}", path.toAbsolutePath().getFileName(), e.getMessage());
