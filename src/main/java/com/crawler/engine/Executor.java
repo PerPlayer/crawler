@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -28,6 +29,10 @@ import static com.crawler.util.http.HttpUtil.get;
 
 public class Executor {
 
+    private static final Logger logger = Logger.getLogger(Executor.class);
+
+    private static int TEXT_SIZE = 1024*16;
+    private static int IMG_SIZE = 1024*64;
     private static String HOST = "http://localhost/";
     private static final String TMP_PATH = "E://tmp/tmp/";
     private static final String URL_PATH = "E://tmp/url/";
@@ -38,22 +43,43 @@ public class Executor {
 
     private static Executor executor = new Executor();
 
+    {
+        logger.info("******** 初始化目录 ********");
+        initDir(TMP_PATH);
+        initDir(URL_PATH);
+        initDir(IMG_PATH);
+        initDir(FILE_PATH);
+        logger.info("******** 初始化结束 ********");
+    }
+
+    private void initDir(String filePath) {
+        Path path = Paths.get(filePath);
+        if (!Files.exists(path)) {
+            try {
+                logger.info("创建目录> {} ", filePath);
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                logger.info("初始化化目录异常> {}", e.getMessage());
+            }
+        }
+    }
+
     public static Executor executor(){
         return executor;
     }
 
     public void execute(String url, String key){
-        fetchHost(url);
-        pullText(url);
-        pullUrl();
+        pullText(TMP_PATH, url);
+
+        fetchUrl();
         downloadImg();
         downloadUrl();
 
-
-//        pullContent(key, text);
+        downloadUrl();
     }
 
     private void downloadUrl(){
+        logger.info("******** 开始抓取URL ********");
         Path path = Paths.get(URL_PATH);
         try {
             Files.list(path).forEachOrdered(cpath-> {
@@ -61,28 +87,27 @@ public class Executor {
                 String[] urls = text.split(System.lineSeparator());
                 IntStream.range(0, urls.length).forEach(i->{
                     String url = urls[i];
-                    System.out.println("抓取: " + url);
-//                    execute(url, null);
-                    fetchHost(url);
-                    pullText(url);
-                    pullUrl();
-                    downloadImg();
+                    logger.info("抓取> {}", url);
+                    pullText(TMP_PATH + cpath.getFileName() + "/", url);
                 });
                 try {
                     Files.delete(cpath);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.info("删除> {} 异常> {}", cpath.toAbsolutePath().getFileName(), e);
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("抓取URL异常> {}", e);
         }
+        logger.info("******** 抓取URL结束 ********");
     }
 
     private void downloadImg(){
+        logger.info("******** 开始下载图片 ********");
         Path path = Paths.get(IMG_PATH);
         try {
             Files.list(path).forEachOrdered(cpath-> {
+                logger.info("读取> {} 图片地址", cpath.getFileName());
                 String text = getText(cpath);
                 if (text != null) {
                     String[] imgUrls = text.split(System.lineSeparator());
@@ -91,51 +116,50 @@ public class Executor {
                         String imgUrl = imgUrls[i];
                         if(StringUtils.isBlank(imgUrl)) return;
                         HttpResponse response = null;
-                        String fileName = imgUrl.substring(imgUrl.lastIndexOf("/") + 1);
-                        System.out.println("下载：" + fileName + " -> " + imgUrl);
+                        String fileName = imgUrl.replaceAll(".*/(.*?\\.(?:jpg|png|jpeg|gif|bmp|tif|svg)).*", "$1");
+                        logger.info("下载图片> {}", fileName);
                         fileName = fileName.replace(".", System.currentTimeMillis()+".");
-                        try {
-                            HttpGet request = get(imgUrl);
-                            request.setHeader(HttpHeaders.HOST, "mtl.ttsqgs.com");
-                            request.setHeader(HttpHeaders.REFERER, "https://www.meitulu.com/item/18222.html");
-                            response = client.execute(request);
-                            InputStream inputStream = response.getEntity().getContent();
-                            byte[] bytes = new byte[1024*4];
-                            int t = 0;
-                            while ((t = inputStream.read(bytes)) != -1) {
-                                FileManager.save(filePath, fileName, Arrays.copyOfRange(bytes, 0, t));
-                            }
-                            inputStream.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        download(filePath, imgUrl, fileName);
                     });
                 }
                 try {
+                    logger.info("删除文件> {}", cpath.getFileName());
                     Files.delete(cpath);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.info("删除文件> {} 异常> {}", cpath.getFileName(), e.getMessage());
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("下载图片异常> {}", e);
+        }
+        logger.info("******** 下载图片结束 ********");
+    }
+
+    private void download(String filePath, String fileUrl, String fileName) {
+        HttpResponse response;
+        try {
+            logger.info("开始请求> {}", fileUrl);
+            HttpGet request = get(fileUrl);
+//                            request.setHeader(HttpHeaders.HOST, "mtl.ttsqgs.com");
+//                            request.setHeader(HttpHeaders.REFERER, "https://www.meitulu.com/item/18222.html");
+            response = client.execute(request);
+            logger.info("请求响应> {}", response.getStatusLine());
+            InputStream inputStream = response.getEntity().getContent();
+            byte[] bytes = new byte[IMG_SIZE];
+            int t = 0;
+            while ((t = inputStream.read(bytes)) != -1) {
+                FileManager.save(filePath, fileName, Arrays.copyOfRange(bytes, 0, t));
+            }
+            inputStream.close();
+        } catch (Exception e) {
+            logger.info("下载文件> {} 异常> {}", fileUrl, e.getMessage());
         }
     }
 
-    private void pullText(String url) {
-        try {
-            HttpResponse response = client.execute(get(url));
-            InputStream inputStream = response.getEntity().getContent();
-            byte[] bytes = new byte[1024];
-            StringBuilder sb = new StringBuilder();
-            while (inputStream.read(bytes) != -1) {
-                sb.append(new String(bytes));
-            }
-            inputStream.close();
-            saveFile(TMP_PATH, FILE_NAME + System.currentTimeMillis(), sb.toString().getBytes("UTF-8"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void pullText(String path, String url) {
+        fetchHost(url);
+        logger.info("开始抓取文本> {}", url);
+        download(path, url, FILE_NAME + System.currentTimeMillis());
     }
 
     private void saveFile(String path, String fileName, byte[] data) throws IOException, InterruptedException {
@@ -145,8 +169,9 @@ public class Executor {
 
     private void waitForSave(String path) throws IOException, InterruptedException {
         Path p = Paths.get(path);
-
-        if (p.toFile().list().length>50) {
+        int length = p.toFile().list().length;
+        if (length >50) {
+            logger.info("目录> {} 当前文件数量> {}, 线程> {} 进入等待", path, length, Thread.currentThread().getName());
             while (true) {
                 if (Files.size(p)<=50) {
                     break;
@@ -156,65 +181,72 @@ public class Executor {
         }
     }
 
-    public void pullUrl(){
+    public void fetchUrl(){
+        logger.info("******** 开始提取URL ********");
         Path path = Paths.get(TMP_PATH);
         try {
             Files.list(path).forEachOrdered(cpath->{
                 if (Files.exists(cpath)) {
+                    logger.info("从> {} 提取URL地址", cpath.toAbsolutePath().getFileName());
                     synchronized(cpath.getFileName()){
                         String text = getText(cpath);
                         String title = title(text);
                         Collection<String> pages = pages(text);
-                        StringBuilder urls = new StringBuilder();
-                        pages.forEach(page-> {
-                            if (page.startsWith("//")) {
-                                urls.append("http:").append(page);
-                            } else if (page.startsWith("/")) {
-                                urls.append(HOST).append(page);
-                            } else {
-                                urls.append(page);
-                            }
-                            urls.append(System.lineSeparator());
-                        });
+                        logger.info("提取到URL地址> {}个", pages.size());
                         Collection<String> images = images(text);
-                        StringBuilder imgs = new StringBuilder();
-                        images.forEach(img->imgs.append(img).append(System.lineSeparator()));
+                        logger.info("提取到图片地址> {}个", images.size());
                         try {
-                            saveFile(URL_PATH, title, urls.toString().getBytes("UTF-8"));
-                            saveFile(IMG_PATH, title, imgs.toString().getBytes("UTF-8"));
-//                            saveFile(URL_PATH, FILE_NAME + System.currentTimeMillis(), urls.toString().getBytes("UTF-8"));
-//                            saveFile(IMG_PATH, FILE_NAME + System.currentTimeMillis(), imgs.toString().getBytes("UTF-8"));
+                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
+                            saveFile(IMG_PATH, title, fillUrl(images).getBytes("UTF-8"));
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.info("保存> {} URL地址异常> {}", title, e.getMessage());
                         }
 
                     }
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("提取> {} URL地址异常：{}", path.getFileName(), e.getMessage());
         }
+        logger.info("******** 抓取URL结束 ********");
+    }
+
+    private String fillUrl(Collection<String> pages) {
+        StringBuilder urls = new StringBuilder();
+        pages.forEach(page-> {
+            if (page.startsWith("//")) {
+                urls.append("http:").append(page);
+            } else if (page.startsWith("/")) {
+                urls.append(HOST).append(page);
+            } else {
+                urls.append(page);
+            }
+            urls.append(System.lineSeparator());
+        });
+        return urls.toString();
     }
 
     private static String getText(Path path) {
         try {
+            logger.info("读取> {} 内容", path.toAbsolutePath().getFileName());
             FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             int b = 0;
-            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+            ByteBuffer byteBuffer = ByteBuffer.allocate(TEXT_SIZE);
             while ((b = fileChannel.read(byteBuffer)) != -1) {
                 baos.write(byteBuffer.array(), 0, b);
                 byteBuffer.flip();
             }
             return new String(baos.toByteArray());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("读取> {} 内容异常: {}", path.toAbsolutePath().getFileName(), e.getMessage());
         }
         return null;
     }
 
     private void fetchHost(String url) {
         HOST = url.replaceAll(".*((?:http|https)://.*?/).*", "$1");
+        logger.info("提取Host> {}", HOST);
     }
 
     private void pullContent(String key, String text) {

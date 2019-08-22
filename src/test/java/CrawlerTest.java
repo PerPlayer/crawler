@@ -1,10 +1,12 @@
 import com.crawler.engine.Executor;
 import com.crawler.engine.FileManager;
+import com.crawler.engine.Logger;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -19,7 +21,7 @@ import static com.crawler.util.http.HttpUtil.get;
 
 public class CrawlerTest {
 
-    private static final String URL = "https://www.meitulu.com/item/18222.html";
+    private static final String URL = "https://news.sina.com.cn/";
     private static final String FILE_PATH = "E://tmp/";
     private static final String FILE_NAME = "tmp.txt";
     private static final String KEY = "article";
@@ -29,17 +31,19 @@ public class CrawlerTest {
 //        pullContent();
 //        exec(FileManager.readString(FILE_NAME));
 //        pullAll(FileManager.readString(FILE_NAME));
-//        test();19913392936
+//        test();
         System.out.println("Done...");
         System.exit(0);
     }
 
-    private static void test(){
-        Pattern pattern = Pattern.compile("<div.*?(?:id|class)[ ='\"]+?(?!)article['\"]+?.*?>(.*?)</div>");
-        Matcher matcher = pattern.matcher("df\"https:aaa.<div class=\"Article\" id=\"artbody\">com<title>abc</title>d</div>f\"sdf\"http:bbb.comlsdf");
-        while (matcher.find()) {
-            System.out.println(matcher.group(1));
+    private static void test() throws Exception{
+        FileInputStream inputStream = new FileInputStream(FILE_PATH + "11.jpg");
+        byte[] bytes = new byte[1024*32];
+        int t = 0;
+        while ((t = inputStream.read(bytes)) != -1) {
+            FileManager.save(FILE_PATH, "22.jpg", Arrays.copyOfRange(bytes, 0, t));
         }
+        inputStream.close();
     }
 
     private static void exec(String text){

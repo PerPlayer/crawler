@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 
 public class Engine {
 
+    private static final Logger logger = Logger.getLogger(Engine.class);
+
     private static final String REG_HTTP = "\"((?:http:|https:|//|/).*?)\"";
     private static final String REG_TITLE = "<title>(.*)</title>";
     private static final String REG_CONTENT = "<div.*?(?:id|class)[ ='\"]+?%s['\"]+?.*?>(.*?)</div>";
     private static final String REG_PAGE = "^((?!jpg|png|jpeg|gif|bmp|tif|svg).)*$";
-    private static final String REG_IMAGE = "\"((?:http:|https:|//).*?(?:jpg|png|jpeg|gif|bmp|tif|svg).*?)\"";
+    private static final String REG_IMAGE = "\"((?:http:|https:|//).*?\\.(?:jpg|png|jpeg|gif|bmp|tif|svg).*?)\"";
 
     private static final Pattern PATTERN_HTTP;
     private static final Pattern PATTERN_PAGE;
@@ -44,6 +46,7 @@ public class Engine {
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
             String group = matcher.group(1);
+            logger.info("提取到标题> {}", group);
             if (group.contains("|")) {
                 return group.substring(0, group.indexOf("|"));
             }
