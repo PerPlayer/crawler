@@ -1,5 +1,6 @@
 package com.crawler.engine;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -20,14 +21,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.crawler.engine.Engine.*;
 import static com.crawler.util.http.HttpUtil.client;
@@ -40,11 +44,13 @@ public class Executor {
     private static int TEXT_SIZE = 1024*16;
     private static int IMG_SIZE = 1024*64;
     private static int LIMIT_SIZE = 1024*100;
+    private static int THRESHOLD = 80;
     private static String HOST = "http://localhost/";
     private static final String TMP_PATH = "E://tmp/tmp/";
     private static final String URL_PATH = "E://tmp/url/";
     private static final String IMG_PATH = "E://tmp/img/";
     private static final String FILE_PATH = "E://tmp/file/";
+    private static final String DATA_PATH = "E://tmp/data.tm";
     private static final String FILE_NAME = "tmp";
     private static final HttpClient client = client();
 
@@ -78,7 +84,7 @@ public class Executor {
     }
 
     public void execute(String url, String key){
-//        pullText(TMP_PATH, url);
+        pullText(TMP_PATH, url);
 
         try {
             poolExecutor.submit(()->{
@@ -123,24 +129,6 @@ public class Executor {
 //        downloadUrl();
     }
 
-    private void clearDirectory(String path) {
-        Path p = Paths.get(path);
-        try {
-            Files.list(p).forEachOrdered(pa->{
-                if (Files.isDirectory(pa) && pa.toFile().list().length<1) {
-                    try {
-                        logger.info("删除空目录> {}", pa);
-                        Files.delete(pa);
-                    } catch (IOException e) {
-                        logger.info("删除空目录> {} 异常> {}", pa, e);
-                    }
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void downloadUrl(){
         logger.info("******** 开始抓取URL ********");
         Path path = Paths.get(URL_PATH);
@@ -165,6 +153,85 @@ public class Executor {
         logger.info("******** 抓取URL结束 ********");
     }
 
+    private void pullText(String path, String url) {
+        fetchHost(url);
+        logger.info("开始抓取文本> {}", url);
+        boolean priority = isPriority(url);
+        logger.info("优先级> ", priority);
+
+        String fileName = FILE_NAME + System.currentTimeMillis();
+        logger.info("添加到映射文件");
+        refreshData(fileName, url);
+        download(path, url, fileName);
+    }
+
+    private boolean isPriority(String url){
+        try {
+            Stream<Path> list = Files.list(Paths.get(DATA_PATH));
+            return list.count()<0? true: list.anyMatch(p -> {
+                String fileName = p.getFileName().toString();
+                HashMap<String, String> map = fillDataMap();
+                String targetUrl = map.get(fileName);
+                return matchDegree(targetUrl, url) >= THRESHOLD;
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static int matchDegree(String source, String target){
+        if (StringUtils.isAnyBlank(source, target)) {
+            return 0;
+        }
+        char[] sourceChars = source.toCharArray();
+        char[] targetChars = target.toCharArray();
+        for (int i = 0; i < sourceChars.length; i++) {
+            if (sourceChars[i] != targetChars[i]) {
+                return (int)(i*1f/sourceChars.length*100);
+            }
+        }
+        return 0;
+    }
+
+    public void fetchUrl(){
+        logger.info("******** 开始提取URL ********");
+        Path path = Paths.get(TMP_PATH);
+        try {
+            Files.list(path).forEachOrdered(cpath->{
+                if (Files.exists(cpath)&&!Files.isDirectory(cpath)) {
+                    logger.info("从> {} 提取URL地址", cpath.toAbsolutePath().getFileName());
+                    synchronized(cpath.getFileName()){
+                        String text = getText(cpath);
+                        String title = title(text);
+                        Collection<String> pages = pages(text);
+                        logger.info("提取到URL地址> {}个", pages.size());
+                        Collection<String> images = images(text);
+                        logger.info("提取到图片地址> {}个", images.size());
+                        try {
+//                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
+                            saveFile(IMG_PATH, title, fillUrl(images).getBytes("UTF-8"));
+                            logger.info("更新映射文件> {}> {}", title, cpath.getFileName());
+                            changeData(title, cpath.getFileName().toString());
+                        } catch (Exception e) {
+                            logger.info("保存> {} URL地址异常> {}", title, e.getMessage());
+                        }finally {
+                            try {
+                                Files.delete(cpath);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+                }
+            });
+        } catch (Exception e) {
+            logger.info("提取> {} URL地址异常：{}", path.getFileName(), e.getMessage());
+        }
+        logger.info("******** 抓取URL结束 ********");
+    }
+
     private void downloadImg(){
         logger.info("******** 开始下载图片 ********");
         Path path = Paths.get(IMG_PATH);
@@ -181,7 +248,6 @@ public class Executor {
                         HttpResponse response = null;
                         String fileName = imgUrl.replaceAll(".*/(.*?\\.(?:jpg|png|jpeg|gif|bmp|tif|svg)).*", "$1");
                         logger.info("下载图片> {}", fileName);
-                        fileName = fileName.replace(".", System.currentTimeMillis()+".");
                         download(filePath, imgUrl, fileName);
                     });
                 }
@@ -210,7 +276,7 @@ public class Executor {
             byte[] bytes = new byte[IMG_SIZE];
             int t = 0;
             while ((t = inputStream.read(bytes)) != -1) {
-                FileManager.save(filePath, fileName, Arrays.copyOfRange(bytes, 0, t));
+                FileManager.append(filePath, fileName, Arrays.copyOfRange(bytes, 0, t));
             }
             inputStream.close();
             Path path = Paths.get(filePath + fileName);
@@ -226,15 +292,9 @@ public class Executor {
         }
     }
 
-    private void pullText(String path, String url) {
-        fetchHost(url);
-        logger.info("开始抓取文本> {}", url);
-        download(path, url, FILE_NAME + System.currentTimeMillis());
-    }
-
     private void saveFile(String path, String fileName, byte[] data) throws IOException, InterruptedException {
         waitForSave(path);
-        FileManager.save(path, fileName, data);
+        FileManager.append(path, fileName, data);
     }
 
     private void waitForSave(String path) throws IOException, InterruptedException {
@@ -249,37 +309,6 @@ public class Executor {
                 TimeUnit.MICROSECONDS.sleep(1L);
             }
         }
-    }
-
-    public void fetchUrl(){
-        logger.info("******** 开始提取URL ********");
-        Path path = Paths.get(TMP_PATH);
-        try {
-            Files.list(path).forEachOrdered(cpath->{
-                if (Files.exists(cpath)&&!Files.isDirectory(cpath)) {
-                    logger.info("从> {} 提取URL地址", cpath.toAbsolutePath().getFileName());
-                    synchronized(cpath.getFileName()){
-                        String text = getText(cpath);
-                        String title = title(text);
-                        Collection<String> pages = pages(text);
-                        logger.info("提取到URL地址> {}个", pages.size());
-                        Collection<String> images = images(text);
-                        logger.info("提取到图片地址> {}个", images.size());
-                        try {
-//                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
-                            saveFile(IMG_PATH, title, fillUrl(images).getBytes("UTF-8"));
-                            Files.delete(cpath);
-                        } catch (Exception e) {
-                            logger.info("保存> {} URL地址异常> {}", title, e.getMessage());
-                        }
-
-                    }
-                }
-            });
-        } catch (Exception e) {
-            logger.info("提取> {} URL地址异常：{}", path.getFileName(), e.getMessage());
-        }
-        logger.info("******** 抓取URL结束 ********");
     }
 
     private String fillUrl(Collection<String> pages) {
@@ -323,9 +352,85 @@ public class Executor {
 
     private void pullContent(String key, String text) {
         try {
+            String title = title(text);
             String content = content(key, text);
-            FileManager.save(TMP_PATH, FILE_NAME + System.currentTimeMillis(), content.getBytes("UTF-8"));
+            FileManager.append(FILE_PATH + title + "/", title, content.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshData(String name, String url) {
+        refreshMap(name, url, map->{
+            if (map.containsKey(name)) {
+                return;
+            }
+            map.put(name, url);
+        });
+    }
+
+    private void changeData(String newName, String oldName){
+        refreshMap(newName, oldName, map->{
+            String url = map.get(oldName);
+            Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+            iterator.forEachRemaining(entry->{
+                if (entry.getValue().endsWith(url)) {
+                    iterator.remove();
+                }
+            });
+            map.put(newName, url);
+        });
+    }
+
+    private void refreshMap(String name, String url, Consumer<Map<String, String>> fun) {
+        HashMap<String, String> map = fillDataMap();
+        fun.accept(map);
+        StringBuilder sb = new StringBuilder();
+        map.forEach((k, v)->{
+            sb.append(k).append("> ").append(v).append(System.lineSeparator());
+        });
+        try {
+            FileManager.save("E://tmp/", "data.tm", sb.toString().getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private HashMap<String, String> fillDataMap() {
+        Path path = Paths.get(DATA_PATH);
+        if (!Files.exists(path)) {
+            try {
+                Files.createFile(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        String text = getText(path);
+        HashMap<String, String> map = Maps.newHashMap();
+        if(StringUtils.isNotBlank(text)) {
+            String[] split = text.split(System.lineSeparator());
+            Arrays.asList(split).forEach(str->{
+                String[] sp = str.split(">");
+                map.put(sp[0], sp[1].trim());
+            });
+        }
+        return map;
+    }
+
+    private void clearDirectory(String path) {
+        Path p = Paths.get(path);
+        try {
+            Files.list(p).forEachOrdered(pa->{
+                if (Files.isDirectory(pa) && pa.toFile().list().length<1) {
+                    try {
+                        logger.info("删除空目录> {}", pa);
+                        Files.delete(pa);
+                    } catch (IOException e) {
+                        logger.info("删除空目录> {} 异常> {}", pa, e);
+                    }
+                }
+            });
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -27,6 +27,26 @@ public class FileManager {
     }
 
     public static void save(String path, String fileName, byte[] data) {
+        Path nf = prepare(path, fileName, data);
+        try(FileChannel fileChannel = FileChannel.open(nf, StandardOpenOption.CREATE, StandardOpenOption.WRITE)){
+            logger.info("保存文件> {} > {}kb", nf, String.format("%.1f", data.length/1024f));
+            fileChannel.write(ByteBuffer.wrap(data));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void append(String path, String fileName, byte[] data) {
+        Path nf = prepare(path, fileName, data);
+        try(FileChannel fileChannel = FileChannel.open(nf, StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE)){
+            logger.info("追加文件> {} > {}kb", nf, String.format("%.1f", data.length/1024f));
+            fileChannel.write(ByteBuffer.wrap(data));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Path prepare(String path, String fileName, byte[] data) {
         Path p = Paths.get(path);
         if (!Files.exists(p)) {
             logger.info("创建多级目录> {}", path);
@@ -36,13 +56,7 @@ public class FileManager {
                 e.printStackTrace();
             }
         }
-        Path nf = Paths.get(path + fileName);
-        logger.info("保存文件> {} > {}kb", nf, String.format("%.1f", data.length/1024f));
-        try(FileChannel fileChannel = FileChannel.open(nf, StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE)){
-            fileChannel.write(ByteBuffer.wrap(data));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return Paths.get(path + fileName);
     }
 
     public static String readString(String fileName){
