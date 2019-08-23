@@ -1,5 +1,6 @@
 package com.crawler.engine;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
@@ -133,21 +134,43 @@ public class Executor {
         logger.info("******** 开始抓取URL ********");
         Path path = Paths.get(URL_PATH);
         try {
-            Files.list(path).forEachOrdered(cpath-> {
-                String text = getText(cpath);
-                String[] urls = text.split(System.lineSeparator());
-                IntStream.range(0, urls.length).forEach(i->{
-                    String url = urls[i];
-                    logger.info("抓取> {}", url);
-                    pullText(TMP_PATH + cpath.getFileName() + "/", url);
+            while (true) {
+                Map<String, String> priorityUrls = Maps.newHashMap();
+                Map<String, String> noPriorityUrls = Maps.newHashMap();
+                Files.list(path).forEachOrdered(cpath-> {
+                    String text = getText(cpath);
+                    String[] urls = text.split(System.lineSeparator());
+                    IntStream.range(0, urls.length).forEach(i->{
+                        String url = urls[i];
+                        boolean priority = isPriority(url);
+                        if (priority) {
+                            priorityUrls.put(cpath.getFileName().toString(), url);
+                        }else{
+                            noPriorityUrls.put(cpath.getFileName().toString(), url);
+                        }
+                    });
+                    try {
+                        Files.delete(cpath);
+                    } catch (IOException e) {
+                        logger.info("删除> {} 异常> {}", cpath.toAbsolutePath().getFileName(), e);
+                    }
                 });
-                try {
-                    Files.delete(cpath);
-                } catch (IOException e) {
-                    logger.info("删除> {} 异常> {}", cpath.toAbsolutePath().getFileName(), e);
+                if (priorityUrls.size() > 0) {
+                    priorityUrls.forEach((k, v) -> {
+                        logger.info("抓取> {}", v);
+                        pullText(TMP_PATH + k + "/", v);
+                    });
+                    priorityUrls.clear();
+                    noPriorityUrls.clear();
+                    continue;
                 }
-            });
-        } catch (IOException e) {
+                noPriorityUrls.forEach((k, v) -> {
+                    logger.info("抓取> {}", v);
+                    pullText(TMP_PATH + k + "/", v);
+                });
+                TimeUnit.SECONDS.sleep(1);
+            }
+        } catch (Exception e) {
             logger.info("抓取URL异常> {}", e);
         }
         logger.info("******** 抓取URL结束 ********");
