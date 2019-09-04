@@ -56,7 +56,7 @@ public class FileManager {
                 e.printStackTrace();
             }
         }
-        return Paths.get(path + fileName);
+        return Paths.get(path + fileName.replace("/", "").trim());
     }
 
     public static String readString(String fileName){

@@ -91,6 +91,7 @@ public class Executor {
             poolExecutor.submit(()->{
                 while (true) {
                     TimeUnit.SECONDS.sleep(1);
+                    System.out.println("-------------提取");
                     fetchUrl();
                     Path p = Paths.get(TMP_PATH);
                     Files.list(p).forEach(path -> {
@@ -99,6 +100,7 @@ public class Executor {
                                 Files.list(path).forEach(path1 -> {
                                     try {
                                         Files.move(path1, Paths.get(p.toString() + "/" + path1.getFileName()), StandardCopyOption.ATOMIC_MOVE);
+                                        System.out.println(">> " + path1);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -106,11 +108,14 @@ public class Executor {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            return;
+
                         }
                     });
-                    clearDirectory(TMP_PATH);
+//                    clearDirectory(TMP_PATH);
                 }
+            });
+            poolExecutor.submit(()->{
+                downloadUrl();
             });
             poolExecutor.submit(()->{
                 while (true) {
@@ -123,30 +128,42 @@ public class Executor {
             e.printStackTrace();
         }
 
+//        downloadUrl();
 //        fetchUrl();
 //        downloadImg();
-        clearDirectory(FILE_PATH);
+//        clearDirectory(FILE_PATH);
 
-//        downloadUrl();
     }
 
     private void downloadUrl(){
-        logger.info("******** 开始抓取URL ********");
         Path path = Paths.get(URL_PATH);
         try {
             while (true) {
-                Map<String, String> priorityUrls = Maps.newHashMap();
-                Map<String, String> noPriorityUrls = Maps.newHashMap();
+                TimeUnit.SECONDS.sleep(1);
+                logger.info("******** 开始抓取URL ********");
+                Map<String, List<String>> priorityUrls = Maps.newHashMap();
+                Map<String, List<String>> noPriorityUrls = Maps.newHashMap();
                 Files.list(path).forEachOrdered(cpath-> {
                     String text = getText(cpath);
                     String[] urls = text.split(System.lineSeparator());
                     IntStream.range(0, urls.length).forEach(i->{
                         String url = urls[i];
-                        boolean priority = isPriority(url);
+                        boolean priority = isPriority(cpath.getFileName().toString(), url);
+                        String key = cpath.getFileName().toString();
                         if (priority) {
-                            priorityUrls.put(cpath.getFileName().toString(), url);
+                            List<String> priorityList = priorityUrls.get(key);
+                            if (priorityList == null) {
+                                priorityList = Lists.newArrayList();
+                                priorityUrls.put(key, priorityList);
+                            }
+                            priorityList.add(url);
                         }else{
-                            noPriorityUrls.put(cpath.getFileName().toString(), url);
+                            List<String> noPriorityList = noPriorityUrls.get(key);
+                            if (noPriorityList == null) {
+                                noPriorityList = Lists.newArrayList();
+                                noPriorityUrls.put(key, Lists.newArrayList());
+                            }
+                            noPriorityList.add(url);
                         }
                     });
                     try {
@@ -157,8 +174,10 @@ public class Executor {
                 });
                 if (priorityUrls.size() > 0) {
                     priorityUrls.forEach((k, v) -> {
-                        logger.info("抓取> {}", v);
-                        pullText(TMP_PATH + k + "/", v);
+                        logger.info("优先抓取> {}", v);
+                        v.forEach(url->{
+                            pullText(TMP_PATH + k + "/", url);
+                        });
                     });
                     priorityUrls.clear();
                     noPriorityUrls.clear();
@@ -166,35 +185,33 @@ public class Executor {
                 }
                 noPriorityUrls.forEach((k, v) -> {
                     logger.info("抓取> {}", v);
-                    pullText(TMP_PATH + k + "/", v);
+                    v.forEach(url->{
+                        pullText(TMP_PATH + k + "/", url);
+                    });
                 });
-                TimeUnit.SECONDS.sleep(1);
+                logger.info("******** 抓取URL结束 ********");
             }
         } catch (Exception e) {
             logger.info("抓取URL异常> {}", e);
+            e.printStackTrace();
         }
-        logger.info("******** 抓取URL结束 ********");
     }
 
     private void pullText(String path, String url) {
         fetchHost(url);
         logger.info("开始抓取文本> {}", url);
-        boolean priority = isPriority(url);
-        logger.info("优先级> ", priority);
-
         String fileName = FILE_NAME + System.currentTimeMillis();
         logger.info("添加到映射文件");
         refreshData(fileName, url);
         download(path, url, fileName);
     }
 
-    private boolean isPriority(String url){
+    private boolean isPriority(String name, String url){
         try {
-            Stream<Path> list = Files.list(Paths.get(DATA_PATH));
-            return list.count()<0? true: list.anyMatch(p -> {
-                String fileName = p.getFileName().toString();
+            Stream<Path> list = Files.list(Paths.get(FILE_PATH));
+            return list.count()<0? true: Files.list(Paths.get(FILE_PATH)).anyMatch(p -> {
                 HashMap<String, String> map = fillDataMap();
-                String targetUrl = map.get(fileName);
+                String targetUrl = map.get(name);
                 return matchDegree(targetUrl, url) >= THRESHOLD;
             });
         } catch (IOException e) {
@@ -214,7 +231,7 @@ public class Executor {
                 return (int)(i*1f/sourceChars.length*100);
             }
         }
-        return 0;
+        return 100;
     }
 
     public void fetchUrl(){
@@ -232,27 +249,23 @@ public class Executor {
                         Collection<String> images = images(text);
                         logger.info("提取到图片地址> {}个", images.size());
                         try {
-//                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
+                            if(title==null) return;
+                            saveFile(URL_PATH, title, fillUrl(pages).getBytes("UTF-8"));
                             saveFile(IMG_PATH, title, fillUrl(images).getBytes("UTF-8"));
+                            Files.delete(cpath);
                             logger.info("更新映射文件> {}> {}", title, cpath.getFileName());
                             changeData(title, cpath.getFileName().toString());
                         } catch (Exception e) {
                             logger.info("保存> {} URL地址异常> {}", title, e.getMessage());
-                        }finally {
-                            try {
-                                Files.delete(cpath);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            e.printStackTrace();
                         }
-
                     }
                 }
             });
         } catch (Exception e) {
             logger.info("提取> {} URL地址异常：{}", path.getFileName(), e.getMessage());
         }
-        logger.info("******** 抓取URL结束 ********");
+        logger.info("******** 提取URL结束 ********");
     }
 
     private void downloadImg(){
@@ -383,7 +396,7 @@ public class Executor {
         }
     }
 
-    private void refreshData(String name, String url) {
+    private synchronized void refreshData(String name, String url) {
         refreshMap(name, url, map->{
             if (map.containsKey(name)) {
                 return;
@@ -392,12 +405,13 @@ public class Executor {
         });
     }
 
-    private void changeData(String newName, String oldName){
+    private synchronized void changeData(String newName, String oldName){
+        System.out.println();
         refreshMap(newName, oldName, map->{
             String url = map.get(oldName);
             Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
             iterator.forEachRemaining(entry->{
-                if (entry.getValue().endsWith(url)) {
+                if (entry.getValue().endsWith(url)||entry.getKey().startsWith(FILE_NAME)) {
                     iterator.remove();
                 }
             });
@@ -433,8 +447,10 @@ public class Executor {
         if(StringUtils.isNotBlank(text)) {
             String[] split = text.split(System.lineSeparator());
             Arrays.asList(split).forEach(str->{
-                String[] sp = str.split(">");
-                map.put(sp[0], sp[1].trim());
+                if (str.contains(">")) {
+                    String[] sp = str.split(">");
+                    map.put(sp[0], sp[1].trim());
+                }
             });
         }
         return map;
