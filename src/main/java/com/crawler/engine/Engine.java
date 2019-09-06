@@ -2,7 +2,9 @@ package com.crawler.engine;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -81,7 +83,12 @@ public class Engine {
     }
 
     public static Collection<String> images(String text) {
-        return fetchUrl(PATTERN_IMAGE, text);
+        Collection<String> urls = fetchUrl(PATTERN_HTTP, text);
+        List<String> collect = urls.stream().filter(url -> {
+            String substring = url.substring(url.lastIndexOf(".") + 1);
+            return Arrays.asList(SUFFIX_IMAGE).contains(substring);
+        }).collect(Collectors.toList());
+        return collect;
     }
 
     public static Collection<String> pages(String text){
